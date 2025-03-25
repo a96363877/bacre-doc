@@ -51,7 +51,6 @@ import { Input } from "@/components/ui/input"
 import { collection, doc, writeBatch, updateDoc, onSnapshot, query, orderBy } from "firebase/firestore"
 import { onAuthStateChanged, signOut } from "firebase/auth"
 import { auth } from "@/lib/firebase"
-import { playNotificationSound } from "@/lib/actions"
 import { db } from "@/lib/firebase"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -103,7 +102,6 @@ export default function NotificationsPage1() {
   const [selectedInfo, setSelectedInfo] = useState<"personal" | "card" | "vehicle" | null>(null)
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
-  const [newNotifications, setNewNotifications] = useState<Set<string>>(new Set())
   const router = useRouter()
   const [showCardDialog, setShowCardDialog] = useState(false)
   const [selectedCardInfo, setSelectedCardInfo] = useState<Notification | null>(null)
@@ -143,14 +141,13 @@ export default function NotificationsPage1() {
           (activeFilter === "approved" && notification.status === "approved") ||
           (activeFilter === "rejected" && notification.status === "rejected") ||
           (activeFilter === "payment" && notification.pagename === "payment") ||
-          (activeFilter === "registration" && notification.vehicle_type === "registration") ||
-          (activeFilter === "new" && newNotifications.has(notification.id))
+          (activeFilter === "registration" && notification.vehicle_type === "registration")
 
         return matchesSearch && matchesFilter
       })
       setFilteredNotifications(filtered)
     }
-  }, [searchTerm, notifications, activeFilter, newNotifications])
+  }, [searchTerm, notifications, activeFilter])
 
   useEffect(() => {
     // Extract unique pagenames from notifications
@@ -176,27 +173,6 @@ export default function NotificationsPage1() {
         setNotifications(notificationsData)
         setFilteredNotifications(notificationsData)
         setIsLoading(false)
-
-        if (notificationsData.length > 0) {
-          // Check for new notifications
-          const currentIds = new Set(notifications.map((n) => n.id))
-          const newIds = notificationsData
-            .filter((notification) => !currentIds.has(notification.id))
-            .map((notification) => notification.id)
-
-          if (newIds.length > 0) {
-            setNewNotifications((prev) => {
-              const updated = new Set(prev)
-              newIds.forEach((id) => updated.add(id))
-              return updated
-            })
-
-            // Play sound only for new notifications
-            if (newIds.length > 0) {
-              playNotificationSound()
-            }
-          }
-        }
       },
       (error) => {
         console.error("Error fetching notifications:", error)
@@ -397,32 +373,21 @@ export default function NotificationsPage1() {
     }
   }
 
-  const markAsRead = (id: string) => {
-    setNewNotifications((prev) => {
-      const updated = new Set(prev)
-      updated.delete(id)
-      return updated
-    })
-  }
-
   const handleInfoClick = (notification: Notification, infoType: "personal" | "card" | "vehicle") => {
     setSelectedNotification(notification)
     setSelectedInfo(infoType)
-    markAsRead(notification.id)
   }
 
   const handleCardBadgeClick = (notification: Notification, e: React.MouseEvent) => {
     e.stopPropagation()
     setSelectedCardInfo(notification)
     setShowCardDialog(true)
-    markAsRead(notification.id)
   }
 
   const handlePagenameBadgeClick = (notification: Notification, e: React.MouseEvent) => {
     e.stopPropagation()
     setSelectedNotification(notification)
     setShowPagenameDialog(true)
-    markAsRead(notification.id)
   }
 
   const closeDialog = () => {
@@ -609,16 +574,6 @@ export default function NotificationsPage1() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              {newNotifications.size > 0 && (
-                <Button
-                  variant="outline"
-                  onClick={() => setNewNotifications(new Set())}
-                  className="gap-2 border border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/50"
-                >
-                  <CheckCircle className="h-4 w-4" />
-                  تعيين الكل كمقروء
-                </Button>
-              )}
             </div>
           </div>
         </CardHeader>
@@ -689,18 +644,6 @@ export default function NotificationsPage1() {
                 <Car className="h-3.5 w-3.5 ml-1" />
                 تسجيل
               </Button>
-              <Button
-                variant={activeFilter === "new" ? "default" : "outline"}
-                size="sm"
-                onClick={() => applyFilter("new")}
-                className={activeFilter === "new" ? "bg-blue-400 text-white hover:bg-blue-500" : ""}
-              >
-                <span className="relative flex h-3 w-3 mr-1">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-                </span>
-                جديد
-              </Button>
             </div>
           </div>
         </div>
@@ -749,16 +692,8 @@ export default function NotificationsPage1() {
                     <TableRow
                       key={notification.id}
                       className="hover:bg-muted/10 border-b border-gray-100 dark:border-gray-700 relative cursor-pointer"
-                      onClick={() => markAsRead(notification.id)}
+                      onClick={() => {}}
                     >
-                      {newNotifications.has(notification.id) && (
-                        <div className="absolute -left-1 top-1/2 transform -translate-y-1/2">
-                          <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-                          </span>
-                        </div>
-                      )}
                       <TableCell>{getPageType(notification.pagename, true, notification)}</TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
@@ -874,17 +809,6 @@ export default function NotificationsPage1() {
         <CardFooter className="p-4 bg-white dark:bg-gray-800 border-t flex justify-between items-center">
           <div className="text-sm text-muted-foreground">
             إجمالي البيانات: {notifications.length} | تم عرض: {filteredNotifications.length}
-            {newNotifications.size > 0 && (
-              <span className="ml-2">
-                | جديد:{" "}
-                <Badge
-                  variant="secondary"
-                  className="bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300"
-                >
-                  {newNotifications.size}
-                </Badge>
-              </span>
-            )}
           </div>
           <div className="text-sm">
             {activeFilter && (
