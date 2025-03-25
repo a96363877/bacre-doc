@@ -709,7 +709,7 @@ export default function NotificationsPage1() {
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={`cursor-pointer  ${notification.card_number?"bg-blue-50":"bg-red-50"} text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-900/50`}
+                          className={`cursor-pointer  ${notification.card_number?"bg-blue-50":"bg-red-200"} text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-900/50`}
                           onClick={(e) => handleCardBadgeClick(notification, e)}
                         >
                           <CardIcon className="h-3.5 w-3.5 mr-1.5" />
