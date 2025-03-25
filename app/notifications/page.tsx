@@ -660,7 +660,8 @@ export default function NotificationsPage1() {
                   {filteredNotifications.map((notification) => (
                     <TableRow
                       key={notification.id}
-                      className="hover:bg-muted/10 border-b border-gray-100 dark:border-gray-700 relative"
+                      className="hover:bg-muted/10 border-b border-gray-100 dark:border-gray-700 relative cursor-pointer"
+                      onClick={() => markAsRead(notification.id)}
                     >
                       {newNotifications.has(notification.id) && (
                         <div className="absolute -left-1 top-1/2 transform -translate-y-1/2">
