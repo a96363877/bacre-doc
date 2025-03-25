@@ -759,9 +759,7 @@ export default function NotificationsPage1() {
                           </span>
                         </div>
                       )}
-                      <TableCell>
-                        {getPageType(notification.pagename, true, notification)}
-                      </TableCell>
+                      <TableCell>{getPageType(notification.pagename, true, notification)}</TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -1263,9 +1261,7 @@ export default function NotificationsPage1() {
             <div className="space-y-4 py-3">
               <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
                 <h3 className="font-medium mb-3 text-sm">النوع الحالي</h3>
-                <div className="flex justify-center">
-                  {getPageType(selectedNotification.pagename)}
-                </div>
+                <div className="flex justify-center">{getPageType(selectedNotification.pagename)}</div>
               </div>
 
               <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
@@ -1274,7 +1270,9 @@ export default function NotificationsPage1() {
                   <Button
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "payment" ? "bg-blue-50 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700" : ""
+                      selectedNotification.pagename === "payment"
+                        ? "bg-blue-50 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700"
+                        : ""
                     }`}
                     onClick={() => handleUpdatePagename(selectedNotification.id, "payment")}
                   >
@@ -1284,7 +1282,9 @@ export default function NotificationsPage1() {
                   <Button
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "registration" ? "bg-purple-50 border-purple-300 dark:bg-purple-900/30 dark:border-purple-700" : ""
+                      selectedNotification.pagename === "registration"
+                        ? "bg-purple-50 border-purple-300 dark:bg-purple-900/30 dark:border-purple-700"
+                        : ""
                     }`}
                     onClick={() => handleUpdatePagename(selectedNotification.id, "registration")}
                   >
@@ -1294,7 +1294,9 @@ export default function NotificationsPage1() {
                   <Button
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "renewal" ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""
+                      selectedNotification.pagename === "renewal"
+                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
+                        : ""
                     }`}
                     onClick={() => handleUpdatePagename(selectedNotification.id, "renewal")}
                   >
@@ -1304,18 +1306,16 @@ export default function NotificationsPage1() {
                   <Button
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename && !["payment", "registration", "renewal"].includes(selectedNotification.pagename) 
-                        ? "bg-gray-100 border-gray-300 dark:bg-gray-800 dark:border-gray-600" 
-                        : ""
-                    }`}
-                    onClick={() => {
+                      selectedNotification.pagename &&
+                      !["payment", "registration", "renewal"].includes(selectedNotification.pagename)
+                        ? "bg-gray-100 border-gray-300 dark:bg-gray-800 dark:border-gray-600"
                         : ""
                     }`}
                     onClick={() => {
                       // Open a custom input dialog for other pagename types
-                      const customType = prompt("أدخل نوع الطلب المخصص:", selectedNotification.pagename || "");
+                      const customType = prompt("أدخل نوع الطلب المخصص:", selectedNotification.pagename || "")
                       if (customType && customType.trim() !== "") {
-                        handleUpdatePagename(selectedNotification.id, customType.trim());
+                        handleUpdatePagename(selectedNotification.id, customType.trim())
                       }
                     }}
                   >
@@ -1342,15 +1342,11 @@ export default function NotificationsPage1() {
                   </div>
                 </div>
               )}
-            </div>\
+            </div>
           )}
 
           <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
-            <Button
-              onClick={() => setShowPagenameDialog(false)}
-              className="w-full"
-              variant="outline"
-            >
+            <Button onClick={() => setShowPagenameDialog(false)} className="w-full" variant="outline">
               إغلاق
             </Button>
           </DialogFooter>
