@@ -348,7 +348,7 @@ export default function NotificationsPage1() {
         duration: 3000,
         icon: <CheckCircle className="h-5 w-5" />,
       })
-      setShowPagenameDialog(false)
+    //  setShowPagenameDialog(false)
     } catch (error) {
       console.error("Error updating pagename:", error)
       toast.error("حدث خطأ أثناء تحديث نوع الطلب", {
