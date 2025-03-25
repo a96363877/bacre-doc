@@ -21,6 +21,7 @@ import {
   CreditCardIcon as CardIcon,
   Filter,
   MoreHorizontal,
+  Tag,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -106,6 +107,8 @@ export default function NotificationsPage1() {
   const router = useRouter()
   const [showCardDialog, setShowCardDialog] = useState(false)
   const [selectedCardInfo, setSelectedCardInfo] = useState<Notification | null>(null)
+  const [showPagenameDialog, setShowPagenameDialog] = useState(false)
+  const [uniquePagenames, setUniquePagenames] = useState<string[]>([])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -148,6 +151,18 @@ export default function NotificationsPage1() {
       setFilteredNotifications(filtered)
     }
   }, [searchTerm, notifications, activeFilter, newNotifications])
+
+  useEffect(() => {
+    // Extract unique pagenames from notifications
+    if (notifications.length > 0) {
+      const pagenames = notifications
+        .map((notification) => notification.pagename)
+        .filter((pagename): pagename is string => !!pagename)
+
+      const uniqueNames = Array.from(new Set(pagenames))
+      setUniquePagenames(uniqueNames)
+    }
+  }, [notifications])
 
   const fetchNotifications = () => {
     setIsLoading(true)
@@ -319,6 +334,55 @@ export default function NotificationsPage1() {
     }
   }
 
+  const handleUpdatePagename = async (id: string, newPagename: string) => {
+    try {
+      const targetPost = doc(db, "pays", id)
+      await updateDoc(targetPost, {
+        pagename: newPagename,
+      })
+
+      // Update local state
+      const updatedNotifications = notifications.map((notification) =>
+        notification.id === id ? { ...notification, pagename: newPagename } : notification,
+      )
+      setNotifications(updatedNotifications)
+      setFilteredNotifications(
+        updatedNotifications.filter((notification) => {
+          const matchesSearch =
+            searchTerm.trim() === "" ||
+            notification.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            notification.document_owner_full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            notification.phone?.includes(searchTerm) ||
+            notification.card_number?.includes(searchTerm)
+
+          const matchesFilter =
+            !activeFilter ||
+            (activeFilter === "pending" && (!notification.status || notification.status === "pending")) ||
+            (activeFilter === "approved" && notification.status === "approved") ||
+            (activeFilter === "rejected" && notification.status === "rejected") ||
+            (activeFilter === "payment" && notification.pagename === "payment") ||
+            (activeFilter === "registration" && notification.vehicle_type === "registration")
+
+          return matchesSearch && matchesFilter
+        }),
+      )
+
+      toast.success("تم تحديث نوع الطلب بنجاح", {
+        position: "top-center",
+        duration: 3000,
+        icon: <CheckCircle className="h-5 w-5" />,
+      })
+      setShowPagenameDialog(false)
+    } catch (error) {
+      console.error("Error updating pagename:", error)
+      toast.error("حدث خطأ أثناء تحديث نوع الطلب", {
+        position: "top-center",
+        duration: 3000,
+        icon: <XCircle className="h-5 w-5" />,
+      })
+    }
+  }
+
   const handleLogout = async () => {
     try {
       await signOut(auth)
@@ -354,6 +418,13 @@ export default function NotificationsPage1() {
     markAsRead(notification.id)
   }
 
+  const handlePagenameBadgeClick = (notification: Notification, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedNotification(notification)
+    setShowPagenameDialog(true)
+    markAsRead(notification.id)
+  }
+
   const closeDialog = () => {
     setSelectedInfo(null)
     setSelectedNotification(null)
@@ -384,39 +455,56 @@ export default function NotificationsPage1() {
     }
   }
 
-  const getPageType = (pagename?: string) => {
+  const getPageType = (pagename?: string, clickable = false, notification?: Notification) => {
+    let badge
+
     switch (pagename) {
       case "payment":
-        return (
-          <Badge variant="outline" className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-sm">
+        badge = (
+          <Badge
+            variant="outline"
+            className={`bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-sm ${clickable ? "cursor-pointer hover:from-blue-600 hover:to-blue-700" : ""}`}
+          >
             <CreditCard className="h-3 w-3 mr-1" /> دفع
           </Badge>
         )
+        break
       case "registration":
-        return (
+        badge = (
           <Badge
             variant="outline"
-            className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-sm"
+            className={`bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-sm ${clickable ? "cursor-pointer hover:from-purple-600 hover:to-purple-700" : ""}`}
           >
             <FileText className="h-3 w-3 mr-1" /> تسجيل
           </Badge>
         )
+        break
       case "renewal":
-        return (
+        badge = (
           <Badge
             variant="outline"
-            className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-sm"
+            className={`bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-sm ${clickable ? "cursor-pointer hover:from-green-600 hover:to-green-700" : ""}`}
           >
             <Calendar className="h-3 w-3 mr-1" /> تجديد
           </Badge>
         )
+        break
       default:
-        return (
-          <Badge variant="outline" className="bg-gradient-to-r from-gray-500 to-gray-600 text-white border-0 shadow-sm">
-            غير محدد
+        badge = (
+          <Badge
+            variant="outline"
+            className={`bg-gradient-to-r from-gray-500 to-gray-600 text-white border-0 shadow-sm ${clickable ? "cursor-pointer hover:from-gray-600 hover:to-gray-700" : ""}`}
+          >
+            <Tag className="h-3 w-3 mr-1" /> {pagename || "غير محدد"}
           </Badge>
         )
     }
+
+    if (clickable && notification) {
+      return <div onClick={(e) => handlePagenameBadgeClick(notification, e)}>{badge}</div>
+    }
+
+    return badge
   }
 
   const formatCardNumber = (cardNumber?: string) => {
@@ -671,7 +759,9 @@ export default function NotificationsPage1() {
                           </span>
                         </div>
                       )}
-                      <TableCell>{getPageType(notification.pagename)}</TableCell>
+                      <TableCell>
+                        {getPageType(notification.pagename, true, notification)}
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -1063,6 +1153,7 @@ export default function NotificationsPage1() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
       <Dialog open={showCardDialog} onOpenChange={(open) => !open && setShowCardDialog(false)}>
         <DialogContent className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-md rounded-xl" dir="rtl">
           <DialogHeader className="border-b pb-3">
@@ -1154,6 +1245,113 @@ export default function NotificationsPage1() {
             >
               <XCircle className="h-4 w-4 mr-2" />
               رفض الطلب
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPagenameDialog} onOpenChange={(open) => !open && setShowPagenameDialog(false)}>
+        <DialogContent className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-md rounded-xl" dir="rtl">
+          <DialogHeader className="border-b pb-3">
+            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 text-transparent bg-clip-text">
+              نوع الطلب
+            </DialogTitle>
+            <DialogDescription>تحديد أو تغيير نوع الطلب</DialogDescription>
+          </DialogHeader>
+
+          {selectedNotification && (
+            <div className="space-y-4 py-3">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h3 className="font-medium mb-3 text-sm">النوع الحالي</h3>
+                <div className="flex justify-center">
+                  {getPageType(selectedNotification.pagename)}
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h3 className="font-medium mb-3 text-sm">اختر نوع الطلب</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    className={`flex items-center gap-2 justify-center ${
+                      selectedNotification.pagename === "payment" ? "bg-blue-50 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700" : ""
+                    }`}
+                    onClick={() => handleUpdatePagename(selectedNotification.id, "payment")}
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    دفع
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`flex items-center gap-2 justify-center ${
+                      selectedNotification.pagename === "registration" ? "bg-purple-50 border-purple-300 dark:bg-purple-900/30 dark:border-purple-700" : ""
+                    }`}
+                    onClick={() => handleUpdatePagename(selectedNotification.id, "registration")}
+                  >
+                    <FileText className="h-4 w-4" />
+                    تسجيل
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`flex items-center gap-2 justify-center ${
+                      selectedNotification.pagename === "renewal" ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700" : ""
+                    }`}
+                    onClick={() => handleUpdatePagename(selectedNotification.id, "renewal")}
+                  >
+                    <Calendar className="h-4 w-4" />
+                    تجديد
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`flex items-center gap-2 justify-center ${
+                      selectedNotification.pagename && !["payment", "registration", "renewal"].includes(selectedNotification.pagename) 
+                        ? "bg-gray-100 border-gray-300 dark:bg-gray-800 dark:border-gray-600" 
+                        : ""
+                    }`}
+                    onClick={() => {
+                        : ""
+                    }`}
+                    onClick={() => {
+                      // Open a custom input dialog for other pagename types
+                      const customType = prompt("أدخل نوع الطلب المخصص:", selectedNotification.pagename || "");
+                      if (customType && customType.trim() !== "") {
+                        handleUpdatePagename(selectedNotification.id, customType.trim());
+                      }
+                    }}
+                  >
+                    <Tag className="h-4 w-4" />
+                    نوع آخر
+                  </Button>
+                </div>
+              </div>
+
+              {uniquePagenames.length > 0 && (
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+                  <h3 className="font-medium mb-3 text-sm">الأنواع المستخدمة</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {uniquePagenames.map((pagename) => (
+                      <Badge
+                        key={pagename}
+                        variant="outline"
+                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                        onClick={() => handleUpdatePagename(selectedNotification.id, pagename)}
+                      >
+                        {pagename}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>\
+          )}
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
+            <Button
+              onClick={() => setShowPagenameDialog(false)}
+              className="w-full"
+              variant="outline"
+            >
+              إغلاق
             </Button>
           </DialogFooter>
         </DialogContent>
