@@ -466,7 +466,7 @@ export default function NotificationsPage1() {
     }
 
     if (clickable && notification) {
-      return <div onClick={(e) => handleUpdatePagename(notification.id,pagename)}>{badge}</div>
+      return <div onClick={(e) => handleUpdatePagename(notification.id,pagename as string)}>{badge}</div>
     }
 
     return badge
