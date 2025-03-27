@@ -1569,7 +1569,7 @@ export default function NotificationsPage1() {
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
                       selectedNotification.pagename === "verify-card-ownership"
-                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
+                        ? "bg-green-50 border-green-400 dark:bg-green-900/30 dark:border-green-700"
                         : ""
                     }`}
                     onClick={() =>
