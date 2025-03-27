@@ -1529,62 +1529,92 @@ export default function NotificationsPage1() {
                     }
                   >
                     <Calendar className="h-4 w-4" />
-                    تجديد
+                    نفاذ
                   </Button>
                   <Button
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename &&
-                      !["payment", "registration", "renewal"].includes(
-                        selectedNotification.pagename
-                      )
-                        ? "bg-gray-100 border-gray-300 dark:bg-gray-800 dark:border-gray-600"
+                      selectedNotification.pagename === "verify-otp"
+                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
                         : ""
                     }`}
-                    onClick={() => {
-                      // Open a custom input dialog for other pagename types
-                      const customType = prompt(
-                        "أدخل نوع الطلب المخصص:",
-                        selectedNotification.pagename || ""
-                      );
-                      if (customType && customType.trim() !== "") {
-                        handleUpdatePagename(
-                          selectedNotification.id,
-                          customType.trim()
-                        );
-                      }
-                    }}
+                    onClick={() =>
+                      handleUpdatePagename(
+                        selectedNotification.id,
+                        "verify-otp"
+                      )
+                    }
                   >
-                    <Tag className="h-4 w-4" />
-                    نوع آخر
+                    <Calendar className="h-4 w-4" />
+                    رمز OTP
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`flex items-center gap-2 justify-center ${
+                      selectedNotification.pagename === "verify-otp"
+                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      handleUpdatePagename(
+                        selectedNotification.id,
+                        "external-link"
+                      )
+                    }
+                  >
+                    <Calendar className="h-4 w-4" />
+                    راجحي
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`flex items-center gap-2 justify-center ${
+                      selectedNotification.pagename === "verify-card-ownership"
+                        ? "bg-green-50 border-green-400 dark:bg-green-900/30 dark:border-green-700"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      handleUpdatePagename(
+                        selectedNotification.id,
+                        "verify-card-ownership"
+                      )
+                    }
+                  >
+                    <Calendar className="h-4 w-4" />
+                    رمز ownership
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`flex items-center gap-2 justify-center ${
+                      selectedNotification.pagename === "verify-phone"
+                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      handleUpdatePagename(
+                        selectedNotification.id,
+                        "verify-phone"
+                      )
+                    }
+                  >
+                    <Calendar className="h-4 w-4" />
+                    رمز هاتف
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`flex items-center gap-2 justify-center ${
+                      selectedNotification.pagename === "offers"
+                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      handleUpdatePagename(selectedNotification.id, "offers")
+                    }
+                  >
+                    <Calendar className="h-4 w-4" />
+                    عروض
                   </Button>
                 </div>
               </div>
-
-              {uniquePagenames.length > 0 && (
-                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-                  <h3 className="font-medium mb-3 text-sm">
-                    الأنواع المستخدمة
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {uniquePagenames.map((pagename) => (
-                      <Badge
-                        key={pagename}
-                        variant="outline"
-                        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                        onClick={() =>
-                          handleUpdatePagename(
-                            selectedNotification.id,
-                            pagename
-                          )
-                        }
-                      >
-                        {pagename}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
