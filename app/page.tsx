@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { Eye, EyeOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { auth } from '@/lib/firebase';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { auth } from "@/lib/firebase";
 
 interface LoginFormData {
   email: string;
@@ -17,23 +17,23 @@ interface LoginFormData {
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      router.push('/notifications');
+      router.push("/notifications");
     } catch (err) {
-      setError('فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.');
+      setError("فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.");
     } finally {
       setIsLoading(false);
     }
@@ -49,9 +49,9 @@ export default function LoginPage() {
   return (
     <div
       dir="rtl"
-      className="min-h-screen bg-white flex items-center justify-center p-4"
+      className="min-h-screen bg-gray-800 flex items-center justify-center p-4"
     >
-      <Card className="w-full max-w-md bg-gray-100 text-black border-gray-700">
+      <Card className="w-full max-w-md bg-gray-800 text-white border-gray-700">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold">تسجيل الدخول</CardTitle>
         </CardHeader>
@@ -81,7 +81,7 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   required
                   placeholder="ادخل كلمة المرور"
                   className="bg-gray-200 border-gray-600 text-white placeholder:text-gray-400"
@@ -108,12 +108,12 @@ export default function LoginPage() {
               <div className="text-red-500 text-sm text-center">{error}</div>
             )}
             <Button
-            variant={'default'}
+              variant={"default"}
               type="submit"
               className="w-full  text-white"
               disabled={isLoading}
             >
-              {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+              {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
             </Button>
           </form>
         </CardContent>
