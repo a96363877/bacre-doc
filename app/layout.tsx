@@ -1,9 +1,10 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type React from "react";
+import "@/app/globals.css";
+import { Providers } from "./providers";
 
-export const metadata: Metadata = {
-  title: 'نظام الإشعارات',
-  description: 'نظام إدارة الإشعارات',
+export const metadata = {
+  title: "لوحة البيانات",
+  description: "إدارة وعرض جميع البيانات والإشعارات",
 };
 
 export default function RootLayout({
@@ -12,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl">
-      <body>{children}</body>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

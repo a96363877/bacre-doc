@@ -864,7 +864,7 @@ export default function NotificationsPage1() {
                             notification.card_number
                               ? "bg-green-50 text-green-700"
                               : " bg-gradient-to-r from-red-400 to-red-600 text-white"
-                          }  hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-900/50`}
+                          }  hover:bg-blue-100 dark:bg-blue-900/30 dark:text-white dark:border-blue-800 dark:hover:bg-blue-900/50`}
                           onClick={(e) => handleCardBadgeClick(notification, e)}
                         >
                           <CardIcon className="h-3.5 w-3.5 mr-1.5 mx-1" />
