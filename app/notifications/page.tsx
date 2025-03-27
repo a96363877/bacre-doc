@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Trash2,
@@ -141,6 +141,8 @@ export default function NotificationsPage1() {
   const [showPagenameDialog, setShowPagenameDialog] = useState(false);
   const [uniquePagenames, setUniquePagenames] = useState<string[]>([]);
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -222,6 +224,15 @@ export default function NotificationsPage1() {
     );
 
     return unsubscribe;
+  };
+
+  const playNotificationSound = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch((error) => {
+        console.error("Error playing notification sound:", error);
+      });
+    }
   };
 
   const handleClearAll = async () => {
@@ -381,6 +392,9 @@ export default function NotificationsPage1() {
         pagename: newPagename,
       });
 
+      // Play notification sound
+      playNotificationSound();
+
       // Update local state
       const updatedNotifications = notifications.map((notification) =>
         notification.id === id
@@ -423,7 +437,6 @@ export default function NotificationsPage1() {
         duration: 3000,
         icon: <CheckCircle className="h-5 w-5" />,
       });
-      //  setShowPagenameDialog(false)
     } catch (error) {
       console.error("Error updating pagename:", error);
       toast.error("حدث خطأ أثناء تحديث نوع الطلب", {
@@ -1629,6 +1642,11 @@ export default function NotificationsPage1() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Notification Sound */}
+      <audio ref={audioRef} preload="auto">
+        <source src="/notfication.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
     </div>
   );
 }
