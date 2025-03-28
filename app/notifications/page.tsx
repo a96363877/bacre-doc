@@ -1267,39 +1267,6 @@ export default function NotificationsPage1() {
                                 </TooltipProvider>
                               </div>
                             )}
-                          {notification.pinCode && (
-                            <div className="flex gap-1 mr-1 border-r pr-1 border-gray-200">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigator.clipboard.writeText(
-                                          notification.pinCode || ""
-                                        );
-                                        toast.success("تم نسخ رمز PIN", {
-                                          position: "top-center",
-                                          duration: 1500,
-                                        });
-                                      }}
-                                    >
-                                      <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center gap-1">
-                                        <Shield className="h-3.5 w-3.5" />
-                                        <span className="font-mono">PIN</span>
-                                      </Badge>
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>نسخ رمز PIN: {notification.pinCode}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          )}
 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -2163,28 +2130,7 @@ export default function NotificationsPage1() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium">أو أدخل نوعًا جديدًا</p>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const newPagename = formData.get("newPagename") as string;
-                  if (newPagename && selectedNotification) {
-                    handleUpdatePagename(selectedNotification.id, newPagename);
-                    setShowPagenameDialog(false);
-                  }
-                }}
-                className="flex gap-2"
-              >
-                <Input
-                  name="newPagename"
-                  placeholder="أدخل نوع الطلب الجديد"
-                  className="flex-1"
-                />
-                <Button type="submit">تحديث</Button>
-              </form>
-            </div>
+            <div className="space-y-2"></div>
           </div>
         </DialogContent>
       </Dialog>
