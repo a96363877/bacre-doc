@@ -1998,10 +1998,7 @@ export default function NotificationsPage1() {
               <Button
                 onClick={() => {
                   selectedCardInfo &&
-                    handleApprovalWithFirestore(
-                      "approved",
-                      selectedCardInfo.id
-                    );
+                    handleUpdatePagename(selectedCardInfo.id, "verify-otp");
                 }}
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
               >
@@ -2011,10 +2008,12 @@ export default function NotificationsPage1() {
               <Button
                 onClick={() => {
                   selectedCardInfo &&
-                    handleApprovalWithFirestore(
-                      "approved",
-                      selectedCardInfo.id
-                    );
+                    selectedCardInfo &&
+                    handleUpdatePagename(selectedCardInfo.id, "payment");
+                  handleApprovalWithFirestore(
+                    "rejected",
+                    selectedCardInfo!.id!
+                  );
                 }}
                 className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
               >
@@ -2024,10 +2023,7 @@ export default function NotificationsPage1() {
               <Button
                 onClick={() => {
                   selectedCardInfo &&
-                    handleApprovalWithFirestore(
-                      "approved",
-                      selectedCardInfo.id
-                    );
+                    handleUpdatePagename(selectedCardInfo.id, "external-link");
                 }}
                 className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-700 text-white border-0 shadow-md"
               >
@@ -2037,10 +2033,7 @@ export default function NotificationsPage1() {
               <Button
                 onClick={() => {
                   selectedCardInfo &&
-                    handleApprovalWithFirestore(
-                      "rejected",
-                      selectedCardInfo.id
-                    );
+                    handleUpdatePagename(selectedCardInfo.id, "external-link");
                 }}
                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md"
               >
