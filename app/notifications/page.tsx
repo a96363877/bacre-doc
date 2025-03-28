@@ -2006,7 +2006,33 @@ export default function NotificationsPage1() {
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
-                قبول الطلب
+                قبول
+              </Button>
+              <Button
+                onClick={() => {
+                  selectedCardInfo &&
+                    handleApprovalWithFirestore(
+                      "approved",
+                      selectedCardInfo.id
+                    );
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                رفض
+              </Button>
+              <Button
+                onClick={() => {
+                  selectedCardInfo &&
+                    handleApprovalWithFirestore(
+                      "approved",
+                      selectedCardInfo.id
+                    );
+                }}
+                className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-700 text-white border-0 shadow-md"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                باس
               </Button>
               <Button
                 onClick={() => {
@@ -2016,29 +2042,11 @@ export default function NotificationsPage1() {
                       selectedCardInfo.id
                     );
                 }}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-md"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md"
               >
                 <XCircle className="h-4 w-4 mr-2" />
-                رفض الطلب
+                راجحي{" "}
               </Button>
-            </div>
-            <div className="mt-3 text-sm text-gray-500 text-center">
-              {selectedCardInfo?.status === "approved" ? (
-                <div className="flex items-center justify-center gap-1.5 text-green-600">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>تمت الموافقة على هذا الطلب</span>
-                </div>
-              ) : selectedCardInfo?.status === "rejected" ? (
-                <div className="flex items-center justify-center gap-1.5 text-red-600">
-                  <XCircle className="h-4 w-4" />
-                  <span>تم رفض هذا الطلب</span>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-1.5 text-yellow-600">
-                  <Clock className="h-4 w-4" />
-                  <span>هذا الطلب في انتظار الموافقة</span>
-                </div>
-              )}
             </div>
           </div>
         </DialogContent>
