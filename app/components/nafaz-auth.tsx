@@ -81,7 +81,6 @@ export function NafazAuthDialog({
                   readOnly
                   id="username"
                   value={notification?.nafadUsername}
-                  onChange={(e) => setUsername(e.target.value)}
                   className="pr-10"
                   dir="ltr"
                 />
@@ -98,7 +97,6 @@ export function NafazAuthDialog({
                   id="password"
                   readOnly
                   value={notification?.nafadPassword}
-                  onChange={(e) => setPassword(e.target.value)}
                   className="pr-10"
                   dir="ltr"
                 />

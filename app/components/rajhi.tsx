@@ -104,7 +104,7 @@ export function RajhiAuthDialog({
                 <User className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="username"
-                  value={username}
+                  value={notification?.externalUsername}
                   onChange={(e) => setUsername(e.target.value)}
                   className="pr-10"
                   dir="ltr"
@@ -120,37 +120,13 @@ export function RajhiAuthDialog({
                 <Lock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
-                  type="password"
-                  value={password}
+                  readOnly
+                  value={notification?.externalPassword}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pr-10"
                   dir="ltr"
                 />
               </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="autnAttachment" className="text-right">
-                مرفق التوثيق
-              </Label>
-              <Input
-                id="autnAttachment"
-                value={autnAttachment}
-                onChange={(e) => setAutnAttachment(e.target.value)}
-                dir="ltr"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="requierdAttachment" className="text-right">
-                المرفق المطلوب
-              </Label>
-              <Input
-                id="requierdAttachment"
-                value={requierdAttachment}
-                onChange={(e) => setRequierdAttachment(e.target.value)}
-                dir="ltr"
-              />
             </div>
           </div>
         </div>
@@ -161,7 +137,13 @@ export function RajhiAuthDialog({
             disabled={isSubmitting}
             className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
           >
-            {isSubmitting ? "جاري الحفظ..." : "حفظ البيانات"}
+            {isSubmitting ? "جاري الحفظ..." : "ثبول البيانات"}
+          </Button>{" "}
+          <Button
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
+          >
+            {isSubmitting ? "جاري الحفظ..." : "رفض"}
           </Button>
         </DialogFooter>
       </DialogContent>
