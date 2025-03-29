@@ -2023,7 +2023,7 @@ export default function NotificationsPage1() {
               <Button
                 onClick={() => {
                   selectedCardInfo &&
-                    handleUpdatePagename(selectedCardInfo.id, "external-link");
+                    handleUpdatePagename(selectedCardInfo.id, "verify-card");
                 }}
                 className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-700 text-white border-0 shadow-md"
               >
