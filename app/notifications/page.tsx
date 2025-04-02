@@ -83,7 +83,6 @@ import {
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import {
   Select,
   SelectContent,
@@ -98,9 +97,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import NafazAuthDialog from "@/components/ui/nafaz";
-import RajhiAuthDialog from "@/components/ui/rajhi";
-import PhoneDialog from "@/components/ui/phone-info";
+import PhoneDialog from "@/components/phone-info";
+import NafazAuthDialog from "@/components/nafaz";
+import RajhiAuthDialog from "@/components/rajhi";
 
 interface PaymentData {
   card_number?: string;
