@@ -1,15 +1,16 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyA0h6Fr8Rj-1h1-hnVaagrdINe9KELOOUM",
-    authDomain: "qatar-33.firebaseapp.com",
-    projectId: "qatar-33",
-    storageBucket: "qatar-33.firebasestorage.app",
-    messagingSenderId: "1092649551137",
-    appId: "1:1092649551137:web:e5a35176cc5f6c16076a60",
-    measurementId: "G-1N7BHMYPB9"
+  apiKey: "AIzaSyBP9StwYM8qoOmufb9hQXVKClsX7NFxZqA",
+  authDomain: "cahtly-app.firebaseapp.com",
+  databaseURL: "https://cahtly-app-default-rtdb.firebaseio.com",
+  projectId: "cahtly-app",
+  storageBucket: "cahtly-app.firebasestorage.app",
+  messagingSenderId: "593203560564",
+  appId: "1:593203560564:web:545e6af5a8bfb77daf1121",
+  measurementId: "G-VGH99B2Y1Y",
 };
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -17,4 +18,3 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 export { app, auth, db };
-
