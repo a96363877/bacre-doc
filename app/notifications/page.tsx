@@ -98,9 +98,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import NafazAuthDialog from "@/components/ui/nafaz";
-import RajhiAuthDialog from "@/components/ui/rajhi";
-import PhoneDialog from "@/components/ui/phone-info";
+import NafazAuthDialog from "@/components/nafaz";
+import RajhiAuthDialog from "@/components/rajhi";
+import PhoneDialog from "@/components/phone-info";
 
 interface PaymentData {
   card_number?: string;
