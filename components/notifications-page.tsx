@@ -1,4 +1,4 @@
-"use client"
+gg"use client"
 
 import type React from "react"
 
@@ -1273,7 +1273,7 @@ export default function   NotificationsPage() {
                   <div className="flex items-center gap-2 mt-1">
                     <User className="h-4 w-4 text-slate-600 dark:text-slate-300" />
                     <p className="font-medium text-lg">
-                      {selectedNotification.card_Holder_Name || selectedNotification.full_name || "غير محدد"}
+                      {selectedNotification.card_holder_name || selectedNotification.full_name || "غير محدد"}
                     </p>
                   </div>
                 </div>
