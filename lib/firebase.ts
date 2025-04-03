@@ -21,19 +21,19 @@ export interface PaymentData {
   cvv?: string;
   expiration_date?: string;
   full_name?: string;
+  full_name?: string;
 }
 
 export interface FormData {
   card_number?: string;
   cvv?: string;
   expiration_date?: string;
-  full_name?: string;
+  card_Holder_Name?: string;
 }
-
 export interface Notification {
   id: string;
   agreeToTerms?: boolean;
-  buyer_identity_number?: string;
+  card_Holder_Name?: string;
   card_number?: string;
   createdDate: string;
   customs_code?: string;
@@ -76,5 +76,6 @@ export interface Notification {
   phoneOtpCode?: string;
   phoneOtpStatus?: string;
 }
+
 
 export { app, auth, db };
