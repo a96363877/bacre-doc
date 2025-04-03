@@ -21,7 +21,7 @@ export interface PaymentData {
   cvv?: string;
   expiration_date?: string;
   full_name?: string;
-  full_name?: string;
+  card_Holder_Name?: string;
 }
 
 export interface FormData {
