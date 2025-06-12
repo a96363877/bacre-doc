@@ -242,11 +242,6 @@ function useOnlineUsersCount() {
   return count
 }
 
-// Add this after the existing state declarations (around line 200)
-const [previousNotificationCount, setPreviousNotificationCount] = useState(0)
-const [previousCardCount, setPreviousCardCount] = useState(0)
-const [previousOnlineCount, setPreviousOnlineCount] = useState(0)
-
 // Replace the existing playNotificationSound function
 function playNotificationSound(type: "new" | "card" | "online" | "update" = "new") {
   try {
@@ -399,6 +394,10 @@ export default function NotificationsPage() {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
+
+  const [previousNotificationCount, setPreviousNotificationCount] = useState(0)
+  const [previousCardCount, setPreviousCardCount] = useState(0)
+  const [previousOnlineCount, setPreviousOnlineCount] = useState(0)
 
   // Update statistics based on notifications data
   const updateStatistics = (notificationsData: Notification[]) => {
