@@ -22,8 +22,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { collection, onSnapshot, orderBy, query, doc, updateDoc, where } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { collection, onSnapshot, orderBy, query, doc, updateDoc } from "firebase/firestore"
+import { ref, onValue } from "firebase/database"
+import { database, db } from "@/lib/firebase"
 
 // Flag colors for row highlighting
 type FlagColor = "red" | "yellow" | "green" | null
@@ -199,17 +200,17 @@ function FlagColorSelector({
   )
 }
 
-// User status component
+// User status component - FIXED
 function UserStatus({ userId }: { userId: string }) {
   const [isOnline, setIsOnline] = useState(false)
 
   useEffect(() => {
     // Subscribe to user's online status
-    const userStatusRef = doc(db, "userStatus", userId)
-    const unsubscribe = onSnapshot(userStatusRef, (doc) => {
-      if (doc.exists()) {
-        const data = doc.data()
-        setIsOnline(data.isOnline || false)
+    const userStatusRef = ref(database, `/status/${userId}`)
+    const unsubscribe = onValue(userStatusRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val()
+        setIsOnline(data?.state === "online" || data?.isOnline || false)
       } else {
         setIsOnline(false)
       }
@@ -226,20 +227,30 @@ function UserStatus({ userId }: { userId: string }) {
   )
 }
 
-// Custom hook to count online users
+// Custom hook to track online users count - FIXED
 function useOnlineUsersCount() {
-  const [count, setCount] = useState(0)
+  const [onlineUsersCount, setOnlineUsersCount] = useState(0)
 
   useEffect(() => {
-    const q = query(collection(db, "userStatus"), where("isOnline", "==", true))
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setCount(snapshot.size)
+    const onlineUsersRef = ref(database, "status")
+    const unsubscribe = onValue(onlineUsersRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val()
+        if (data) {
+          const onlineCount = Object.values(data).filter(
+            (status: any) => status.state === "online" || status.isOnline,
+          ).length
+          setOnlineUsersCount(onlineCount)
+        }
+      } else {
+        setOnlineUsersCount(0)
+      }
     })
 
     return () => unsubscribe()
   }, [])
 
-  return count
+  return onlineUsersCount
 }
 
 // Replace the existing playNotificationSound function
@@ -410,7 +421,26 @@ export default function NotificationsPage() {
     setCardSubmissions(cardCount)
   }
 
-  // Replace the existing useEffect for fetching notifications (around line 280)
+  // Update online statuses for all users - FIXED
+  useEffect(() => {
+    const statusRef = ref(database, "status")
+    const unsubscribe = onValue(statusRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val()
+        const newOnlineStatuses: Record<string, boolean> = {}
+
+        Object.entries(data).forEach(([userId, statusData]: [string, any]) => {
+          newOnlineStatuses[userId] = statusData.state === "online" || statusData.isOnline || false
+        })
+
+        setOnlineStatuses(newOnlineStatuses)
+      }
+    })
+
+    return () => unsubscribe()
+  }, [])
+
+  // Replace the existing useEffect for fetching notifications
   useEffect(() => {
     let unsubscribe: () => void
 
@@ -485,12 +515,16 @@ export default function NotificationsPage() {
           // Update statistics
           updateStatistics(notificationsData)
 
-          // Update online statuses
-          const newOnlineStatuses: Record<string, boolean> = {}
+          // Update online statuses based on lastSeen
+          const newOnlineStatuses: Record<string, boolean> = { ...onlineStatuses }
           notificationsData.forEach((notification) => {
             const lastSeenTime = new Date(notification.lastSeen).getTime()
             const fiveMinutesAgo = Date.now() - 5 * 60 * 1000 // 5 minutes in milliseconds
-            newOnlineStatuses[notification.id] = lastSeenTime > fiveMinutesAgo
+
+            // Only update if we don't already have real-time status from Firebase
+            if (newOnlineStatuses[notification.id] === undefined) {
+              newOnlineStatuses[notification.id] = lastSeenTime > fiveMinutesAgo
+            }
           })
           setOnlineStatuses(newOnlineStatuses)
 
@@ -498,7 +532,9 @@ export default function NotificationsPage() {
           setIsLoading(false)
 
           // Reset to first page when data changes significantly
-          setCurrentPage(1)
+          if (Math.abs(currentNotificationCount - previousNotificationCount) > 5) {
+            setCurrentPage(1)
+          }
         },
         (error) => {
           console.error("Error fetching notifications:", error)
@@ -514,7 +550,7 @@ export default function NotificationsPage() {
         unsubscribe()
       }
     }
-  }, [notifications, previousNotificationCount, previousCardCount, onlineStatuses])
+  }, [previousNotificationCount, previousCardCount, onlineStatuses])
 
   // Filter notifications based on the selected filter type
   const filteredNotifications = useMemo(() => {
@@ -575,7 +611,7 @@ export default function NotificationsPage() {
     }
   }
 
-  // Update the handleApproval function (around line 380)
+  // Update the handleApproval function
   const handleApproval = async (state: string, id: string) => {
     try {
       const notificationRef = doc(db, "pays", id)
@@ -612,7 +648,7 @@ export default function NotificationsPage() {
     setSelectedNotification(null)
   }
 
-  // Update the handleFlagColorChange function (around line 400)
+  // Update the handleFlagColorChange function
   const handleFlagColorChange = async (id: string, color: FlagColor) => {
     try {
       // Update in Firestore
