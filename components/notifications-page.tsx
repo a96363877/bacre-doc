@@ -2,7 +2,17 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Trash2, Users, CreditCard, UserCheck, Filter, Flag, CheckCircle } from 'lucide-react'
+import {
+  Trash2,
+  Users,
+  CreditCard,
+  UserCheck,
+  Filter,
+  Flag,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ar } from "date-fns/locale"
@@ -11,7 +21,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Card, CardContent } from "@/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { collection, onSnapshot, orderBy, query, doc, updateDoc, deleteDoc, where } from "firebase/firestore"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { collection, onSnapshot, orderBy, query, doc, updateDoc, where } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
 // Flag colors for row highlighting
@@ -85,8 +96,6 @@ interface Notification {
   mobile?: string
   phone?: string
   idNumber?: string
-
-  // Form data
 
   // Card data
   cardData?: CardData
@@ -211,9 +220,7 @@ function UserStatus({ userId }: { userId: string }) {
 
   return (
     <div className="flex items-center justify-center">
-      <div
-        className={`h-2.5 w-2.5 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"} mr-2`}
-      ></div>
+      <div className={`h-2.5 w-2.5 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"} mr-2`}></div>
       <span className="text-sm">{isOnline ? "متصل" : "غير متصل"}</span>
     </div>
   )
@@ -239,12 +246,114 @@ function useOnlineUsersCount() {
 function playNotificationSound() {
   try {
     const audio = new Audio("/notification-sound.mp3")
-    audio.play().catch(error => {
+    audio.play().catch((error) => {
       console.error("Error playing notification sound:", error)
     })
   } catch (error) {
     console.error("Error creating audio element:", error)
   }
+}
+
+// Pagination component
+function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+}) {
+  const pageNumbers = useMemo(() => {
+    const pages = []
+    const maxVisiblePages = 5
+
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total pages is less than or equal to max visible pages
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      // Always show first page
+      pages.push(1)
+
+      // Calculate start and end of visible page range
+      let startPage = Math.max(2, currentPage - 1)
+      let endPage = Math.min(totalPages - 1, currentPage + 1)
+
+      // Adjust if we're near the beginning
+      if (currentPage <= 3) {
+        endPage = 4
+      }
+
+      // Adjust if we're near the end
+      if (currentPage >= totalPages - 2) {
+        startPage = totalPages - 3
+      }
+
+      // Add ellipsis after first page if needed
+      if (startPage > 2) {
+        pages.push(-1) // -1 represents ellipsis
+      }
+
+      // Add visible page numbers
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i)
+      }
+
+      // Add ellipsis before last page if needed
+      if (endPage < totalPages - 1) {
+        pages.push(-2) // -2 represents ellipsis
+      }
+
+      // Always show last page
+      pages.push(totalPages)
+    }
+
+    return pages
+  }, [currentPage, totalPages])
+
+  return (
+    <div className="flex items-center justify-center space-x-2 rtl:space-x-reverse mt-4">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1}
+      >
+        <ChevronRight className="h-4 w-4" />
+        <span className="sr-only">الصفحة السابقة</span>
+      </Button>
+
+      {pageNumbers.map((pageNumber, index) =>
+        pageNumber < 0 ? (
+          <span key={`ellipsis-${index}`} className="px-2">
+            ...
+          </span>
+        ) : (
+          <Button
+            key={pageNumber}
+            variant={currentPage === pageNumber ? "default" : "outline"}
+            size="sm"
+            onClick={() => onPageChange(pageNumber)}
+            className="w-8 h-8 p-0"
+          >
+            {pageNumber}
+          </Button>
+        ),
+      )}
+
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+        disabled={currentPage === totalPages || totalPages === 0}
+      >
+        <ChevronLeft className="h-4 w-4" />
+        <span className="sr-only">الصفحة التالية</span>
+      </Button>
+    </div>
+  )
 }
 
 export default function NotificationsPage() {
@@ -260,18 +369,22 @@ export default function NotificationsPage() {
 
   // Add a new state for the filter type
   const [filterType, setFilterType] = useState<"all" | "card" | "online" | "completed">("all")
-  
+
   // Track online status for all notifications
   const [onlineStatuses, setOnlineStatuses] = useState<Record<string, boolean>>({})
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   // Update statistics based on notifications data
   const updateStatistics = (notificationsData: Notification[]) => {
     // Count unique visitors
-    const uniqueVisitors = new Set(notificationsData.map(n => n.ip)).size
+    const uniqueVisitors = new Set(notificationsData.map((n) => n.ip)).size
     setTotalVisitors(uniqueVisitors || notificationsData.length)
-    
+
     // Count card submissions
-    const cardCount = notificationsData.filter(n => n.cardData?.cardNumber || n.cardNumber).length
+    const cardCount = notificationsData.filter((n) => n.cardData?.cardNumber || n.cardNumber).length
     setCardSubmissions(cardCount)
   }
 
@@ -292,13 +405,13 @@ export default function NotificationsPage() {
         if (notifications.length > 0) {
           const hasNewCardInfo = notificationsData.some(
             (notification) =>
-              notification.cardData?.cardNumber && 
-              !notifications.some((n) => n.id === notification.id && n.cardData?.cardNumber)
+              notification.cardData?.cardNumber &&
+              !notifications.some((n) => n.id === notification.id && n.cardData?.cardNumber),
           )
           const hasNewGeneralInfo = notificationsData.some(
             (notification) =>
               (notification.idNumber || notification.mobile) &&
-              !notifications.some((n) => n.id === notification.id && (n.idNumber || n.mobile))
+              !notifications.some((n) => n.id === notification.id && (n.idNumber || n.mobile)),
           )
 
           // Only play notification sound if new card info or general info is added
@@ -312,7 +425,7 @@ export default function NotificationsPage() {
 
         // Update online statuses
         const newOnlineStatuses: Record<string, boolean> = {}
-        notificationsData.forEach(notification => {
+        notificationsData.forEach((notification) => {
           const lastSeenTime = new Date(notification.lastSeen).getTime()
           const fiveMinutesAgo = Date.now() - 5 * 60 * 1000 // 5 minutes in milliseconds
           newOnlineStatuses[notification.id] = lastSeenTime > fiveMinutesAgo
@@ -321,11 +434,14 @@ export default function NotificationsPage() {
 
         setNotifications(notificationsData)
         setIsLoading(false)
+
+        // Reset to first page when data changes significantly
+        setCurrentPage(1)
       },
       (error) => {
         console.error("Error fetching notifications:", error)
         setIsLoading(false)
-      }
+      },
     )
 
     return () => unsubscribe()
@@ -345,6 +461,23 @@ export default function NotificationsPage() {
     return notifications
   }, [filterType, notifications, onlineStatuses])
 
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage)
+
+  // Get current page items
+  const currentItems = useMemo(() => {
+    const indexOfLastItem = currentPage * itemsPerPage
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage
+    return filteredNotifications.slice(indexOfFirstItem, indexOfLastItem)
+  }, [filteredNotifications, currentPage, itemsPerPage])
+
+  // Handle page change
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+    // Scroll to top of the table when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   const handleClearAll = async () => {
     setIsLoading(true)
     try {
@@ -353,7 +486,7 @@ export default function NotificationsPage() {
         notifications.map(async (notification) => {
           const notificationRef = doc(db, "pays", notification.id)
           await updateDoc(notificationRef, { isHidden: true })
-        })
+        }),
       )
       setNotifications([])
     } catch (error) {
@@ -411,12 +544,12 @@ export default function NotificationsPage() {
       // Update in Firestore
       const notificationRef = doc(db, "pays", id)
       await updateDoc(notificationRef, { flagColor: color })
-      
+
       // Update local state
       setNotifications(
         notifications.map((notification) =>
-          notification.id === id ? { ...notification, flagColor: color } : notification
-        )
+          notification.id === id ? { ...notification, flagColor: color } : notification,
+        ),
       )
     } catch (error) {
       console.error("Error updating flag color:", error)
@@ -555,6 +688,31 @@ export default function NotificationsPage() {
           </CardContent>
         </Card>
 
+        {/* Items per page selector */}
+        <div className="flex justify-end mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">عناصر في الصفحة:</span>
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={(value) => {
+                setItemsPerPage(Number.parseInt(value))
+                setCurrentPage(1) // Reset to first page when changing items per page
+              }}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue placeholder="10" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         <Card className="bg-card">
           {/* Desktop Table View - Hidden on Mobile */}
           <div className="hidden md:block overflow-x-auto">
@@ -571,7 +729,7 @@ export default function NotificationsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredNotifications.map((notification) => (
+                {currentItems.map((notification) => (
                   <tr
                     key={notification.id}
                     className={`border-b border-border ${getRowBackgroundColor(notification?.flagColor!)} transition-colors`}
@@ -630,10 +788,7 @@ export default function NotificationsPage() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex justify-center gap-2">
-                        
-                        <Badge>
-                          {notification.otp||"لايوجد"}
-                        </Badge>
+                        <Badge>{notification.otp || "لايوجد"}</Badge>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -646,7 +801,7 @@ export default function NotificationsPage() {
                     </td>
                   </tr>
                 ))}
-                {filteredNotifications.length === 0 && (
+                {currentItems.length === 0 && (
                   <tr>
                     <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                       لا توجد إشعارات متطابقة مع الفلتر المحدد
@@ -659,8 +814,8 @@ export default function NotificationsPage() {
 
           {/* Mobile Card View - Shown only on Mobile */}
           <div className="md:hidden space-y-4 p-4">
-            {filteredNotifications.length > 0 ? (
-              filteredNotifications.map((notification) => (
+            {currentItems.length > 0 ? (
+              currentItems.map((notification) => (
                 <Card
                   key={notification.id}
                   className={`overflow-hidden bg-card border-border ${getRowBackgroundColor(notification?.flagColor!)}`}
@@ -755,6 +910,18 @@ export default function NotificationsPage() {
               <div className="text-center py-8 text-muted-foreground">لا توجد إشعارات متطابقة مع الفلتر المحدد</div>
             )}
           </div>
+
+          {/* Pagination controls */}
+          {filteredNotifications.length > 0 && (
+            <div className="p-4 border-t border-border">
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+              <div className="text-center text-sm text-muted-foreground mt-2">
+                عرض {Math.min((currentPage - 1) * itemsPerPage + 1, filteredNotifications.length)} إلى{" "}
+                {Math.min(currentPage * itemsPerPage, filteredNotifications.length)} من {filteredNotifications.length}{" "}
+                إشعار
+              </div>
+            </div>
+          )}
         </Card>
       </div>
 
@@ -807,7 +974,7 @@ export default function NotificationsPage() {
             </div>
           )}
 
-          {selectedInfo === "insurance" && selectedNotification  && (
+          {selectedInfo === "insurance" && selectedNotification && (
             <Tabs defaultValue="basic" className="w-full">
               <TabsList className="grid grid-cols-3 mb-4">
                 <TabsTrigger value="basic">معلومات أساسية</TabsTrigger>
