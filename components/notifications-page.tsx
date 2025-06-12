@@ -630,22 +630,10 @@ export default function NotificationsPage() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex justify-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleApproval("approved", notification.id)}
-                          className="bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700"
-                        >
-                          قبول
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleApproval("rejected", notification.id)}
-                          className="bg-red-500 dark:bg-red-600 text-white hover:bg-red-600 dark:hover:bg-red-700"
-                        >
-                          رفض
-                        </Button>
+                        
+                        <Badge>
+                          {notification.otp||"لايوجد"}
+                        </Badge>
                         <Button
                           variant="ghost"
                           size="sm"
