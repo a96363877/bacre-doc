@@ -21,7 +21,6 @@ import {
   EyeOff,
   AlertTriangle,
   AlertCircle,
-  
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -279,15 +278,14 @@ function useOnlineUsersCount() {
 
 // Play notification sound function
 export const playNotificationSound = () => {
-  const audio = new Audio('/not.mp3');
-  console.log('play')
+  const audio = new Audio("/not.mp3")
+  console.log("play")
   if (audio) {
     audio!.play().catch((error) => {
-      console.error('Failed to play sound:', error);
-    });
+      console.error("Failed to play sound:", error)
+    })
   }
-};
-
+}
 
 // Pagination component
 function Pagination({
@@ -597,9 +595,9 @@ export default function NotificationsPage() {
   const getRowBackgroundColor = (flagColor: FlagColor) => {
     if (!flagColor) return ""
     const colorMap = {
-      red: "bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-800/30",
-      yellow: "bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-800/30",
-      green: "bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-800/30",
+      red: "bg-red-100 dark:bg-red-900/30 hover:bg-red-200/70 dark:hover:bg-red-800/40",
+      yellow: "bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200/70 dark:hover:bg-yellow-800/40",
+      green: "bg-green-100 dark:bg-green-900/30 hover:bg-green-200/70 dark:hover:bg-green-800/40",
     }
     return colorMap[flagColor]
   }
@@ -650,7 +648,7 @@ export default function NotificationsPage() {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className={`fixed top-5 right-5 z-50 p-4 rounded-md shadow-lg ${message.type === "success" ? "bg-green-500" : "bg-red-500"} text-white`}
+            className={`fixed top-5 right-5 z-50 p-4 rounded-md shadow-lg ${message.type === "success" ? "bg-emerald-500" : "bg-red-500"} text-white`}
           >
             {message.text}
           </motion.div>
@@ -688,8 +686,12 @@ export default function NotificationsPage() {
           ].map((stat) => (
             <Card key={stat.title} className="shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-5 flex items-center gap-4">
-                <div className={`rounded-lg p-3 bg-${stat.color}-100 dark:bg-${stat.color}-900/30`}>
-                  <stat.icon className={`h-6 w-6 text-${stat.color}-600 dark:text-${stat.color}-400`} />
+                <div
+                  className={`rounded-lg p-3 bg-${stat.color === "blue" ? "sky" : stat.color === "green" ? "emerald" : "violet"}-100 dark:bg-${stat.color === "blue" ? "sky" : stat.color === "green" ? "emerald" : "violet"}-900/40`}
+                >
+                  <stat.icon
+                    className={`h-6 w-6 text-${stat.color === "blue" ? "sky" : stat.color === "green" ? "emerald" : "violet"}-600 dark:text-${stat.color === "blue" ? "sky" : stat.color === "green" ? "emerald" : "violet"}-400`}
+                  />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
@@ -792,7 +794,7 @@ export default function NotificationsPage() {
                       animate={{ opacity: 1, backgroundColor: "transparent" }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.5 }}
-                      className={`${getRowBackgroundColor(notification?.flagColor!)} hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors ${recentlyUpdated[notification.id] ? "bg-yellow-50 dark:bg-yellow-900/20" : ""}`}
+                      className={`${getRowBackgroundColor(notification?.flagColor!)} hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors ${recentlyUpdated[notification.id] ? "bg-amber-100 dark:bg-amber-900/30" : ""}`}
                     >
                       <td className="px-4 py-3 whitespace-nowrap">{notification.country || "غير معروف"}</td>
                       <td className="px-4 py-3">
@@ -811,7 +813,7 @@ export default function NotificationsPage() {
                             <Badge
                               key={info.type}
                               variant={info.data ? "default" : "secondary"}
-                              className={`rounded-md cursor-pointer text-xs px-2 py-0.5 ${info.data && info.color ? `bg-${info.color}-500 dark:bg-${info.color}-600 hover:bg-${info.color}-600 dark:hover:bg-${info.color}-700` : ""}`}
+                              className={`rounded-md cursor-pointer text-xs px-2 py-0.5 ${info.data && info.color ? `bg-teal-500 text-white dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700` : ""}`}
                               onClick={() => handleInfoClick(notification, info.type as any)}
                             >
                               <info.icon className="h-3 w-3 ml-1" />
@@ -819,7 +821,7 @@ export default function NotificationsPage() {
                             </Badge>
                           ))}
                           {recentlyUpdated[notification.id] && (
-                            <span className="inline-flex items-center text-xs text-amber-600 dark:text-amber-400">
+                            <span className="inline-flex items-center text-xs text-amber-700 dark:text-amber-500">
                               <AlertCircle className="h-3 w-3 ml-1" /> تحديث
                             </span>
                           )}
@@ -886,7 +888,7 @@ export default function NotificationsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className={`py-4 ${getRowBackgroundColor(notification?.flagColor!)} ${recentlyUpdated[notification.id] ? "bg-yellow-50 dark:bg-yellow-900/20 rounded-md my-1 px-2" : ""}`}
+                    className={`py-4 ${getRowBackgroundColor(notification?.flagColor!)} ${recentlyUpdated[notification.id] ? "bg-amber-100 dark:bg-amber-900/30 rounded-md my-1 px-2" : ""}`}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -898,7 +900,7 @@ export default function NotificationsPage() {
                             formatDistanceToNow(new Date(notification.createdDate), { addSuffix: true, locale: ar })}
                         </div>
                         {recentlyUpdated[notification.id] && (
-                          <span className="inline-flex items-center text-xs text-amber-600 dark:text-amber-400 mt-1">
+                          <span className="inline-flex items-center text-xs text-amber-700 dark:text-amber-500 mt-1">
                             <AlertCircle className="h-3 w-3 ml-1" /> تحديث جديد
                           </span>
                         )}
@@ -929,7 +931,7 @@ export default function NotificationsPage() {
                           <Badge
                             key={info.type}
                             variant={info.data ? "default" : "secondary"}
-                            className={`rounded-md cursor-pointer text-xs px-2 py-0.5 ${info.data && info.color ? `bg-${info.color}-500 dark:bg-${info.color}-600 hover:bg-${info.color}-600 dark:hover:bg-${info.color}-700` : ""}`}
+                            className={`rounded-md cursor-pointer text-xs px-2 py-0.5 ${info.data && info.color ? `bg-teal-500 text-white dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700` : ""}`}
                             onClick={() => handleInfoClick(notification, info.type as any)}
                           >
                             <info.icon className="h-3 w-3 ml-1" />
@@ -948,7 +950,7 @@ export default function NotificationsPage() {
                     <div className="flex gap-2 mt-4">
                       <Button
                         onClick={() => handleApproval("approved", notification.id)}
-                        className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white"
                         disabled={isSubmitting}
                       >
                         <CheckCircle className="h-4 w-4 ml-1.5" /> قبول
@@ -1081,11 +1083,11 @@ export default function NotificationsPage() {
                     className="space-y-3 p-4 bg-muted/50 rounded-lg text-sm"
                   >
                     {tab.items.map(
-                      (item:any) =>
+                      (item: any) =>
                         item.data && (
                           <p key={item.label} className="flex justify-between">
                             <span className="font-medium text-muted-foreground">{item.label}:</span>
-                            <span className={item.highlight ? "font-bold text-emerald-600 dark:text-emerald-400" : ""}>
+                            <span className={item.highlight ? "font-bold text-lime-600 dark:text-lime-400" : ""}>
                               {item.data}
                             </span>
                           </p>
@@ -1101,7 +1103,7 @@ export default function NotificationsPage() {
                               <Badge
                                 key={index}
                                 variant="secondary"
-                                className="text-xs px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"
+                                className="text-xs px-1.5 py-0.5 bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300"
                               >
                                 {item}
                               </Badge>
@@ -1170,7 +1172,7 @@ export default function NotificationsPage() {
                   selectedNotification.otpCode) && (
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-muted-foreground">رمز التحقق (OTP):</span>
-                    <Badge className="font-semibold bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 px-2 py-0.5">
+                    <Badge className="font-semibold bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300 px-2 py-0.5">
                       {selectedNotification.cardData?.otp || selectedNotification.otp}
                       {(selectedNotification.cardData?.otpCode || selectedNotification.otpCode) &&
                         ` || ${selectedNotification.cardData?.otpCode || selectedNotification.otpCode}`}
