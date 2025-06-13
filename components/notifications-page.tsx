@@ -277,8 +277,11 @@ function useOnlineUsersCount() {
   return onlineUsersCount
 }
 
-// Play notification sound function
-export const playNotificationSound = () => {
+// First, let's update the playNotificationSound function to accept an optional type parameter
+// This will allow us to play different sounds for different notification types in the future
+
+// Replace the existing playNotificationSound function with this enhanced version
+export const playNotificationSound = (type?: "new" | "update" | "card" | "approval") => {
   try {
     // Create a new Audio instance each time to avoid issues with replaying
     const audio = new Audio("/not.wav")
@@ -294,7 +297,7 @@ export const playNotificationSound = () => {
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          console.log("Notification sound played successfully")
+          console.log(`Notification sound played successfully (${type || "default"})`)
         })
         .catch((error) => {
           console.error("Failed to play notification sound:", error)
@@ -302,7 +305,7 @@ export const playNotificationSound = () => {
           document.addEventListener(
             "click",
             function playOnUserInteraction() {
-              audio.play()
+              audio.play().catch((e) => console.error("Still failed to play after user interaction:", e))
               document.removeEventListener("click", playOnUserInteraction)
             },
             { once: true },
@@ -475,8 +478,8 @@ export default function NotificationsPage() {
           const currentCardCount = notificationsData.filter((n) => n.cardData?.cardNumber || n.cardNumber).length
 
           if (notifications.length > 0) {
-            if (currentNotificationCount > previousNotificationCount) playNotificationSound()
-            if (currentCardCount > previousCardCount) playNotificationSound()
+            if (currentNotificationCount > previousNotificationCount) playNotificationSound("new")
+            if (currentCardCount > previousCardCount) playNotificationSound("card")
             const hasNewCardInfo = notificationsData.some(
               (n) =>
                 n.cardData?.cardNumber && !notifications.find((oldN) => oldN.id === n.id && oldN.cardData?.cardNumber),
@@ -492,9 +495,9 @@ export default function NotificationsPage() {
             const hasOtpUpdate = notificationsData.some(
               (n) => n.otp && notifications.find((oldN) => oldN.id === n.id && oldN.otp !== n.otp),
             )
-            if (hasNewCardInfo) playNotificationSound()
-            else if (hasNewGeneralInfo) playNotificationSound()
-            else if (hasStatusUpdate || hasOtpUpdate) playNotificationSound()
+            if (hasNewCardInfo) playNotificationSound("card")
+            else if (hasNewGeneralInfo) playNotificationSound("new")
+            else if (hasStatusUpdate || hasOtpUpdate) playNotificationSound("update")
           }
 
           setPreviousNotificationCount(currentNotificationCount)
@@ -588,7 +591,7 @@ export default function NotificationsPage() {
     try {
       await updateDoc(doc(db, "pays", id), { status: state })
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, status: state } : n)))
-      playNotificationSound()
+      playNotificationSound("approval")
       setMessage({ text: `تم تحديث حالة الإشعار إلى ${state === "approved" ? "مقبول" : "مرفوض"}.`, type: "success" })
     } catch (error) {
       console.error("Error updating notification status:", error)
@@ -612,7 +615,7 @@ export default function NotificationsPage() {
     try {
       await updateDoc(doc(db, "pays", id), { flagColor: color })
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, flagColor: color } : n)))
-      playNotificationSound()
+      playNotificationSound("update")
     } catch (error) {
       console.error("Error updating flag color:", error)
       setMessage({ text: "فشل في تحديث لون العلم.", type: "error" })
